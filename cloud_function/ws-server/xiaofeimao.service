@@ -6,9 +6,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=xiaofeimao
-WorkingDirectory=/opt/xiaofeimao/ws-server
-EnvironmentFile=/opt/xiaofeimao/ws-server/.env
-ExecStart=/opt/xiaofeimao/ws-server/venv/bin/python3 /opt/xiaofeimao/ws-server/main.py
+WorkingDirectory=/opt/xiaofeimao/cloud_function/ws-server
+EnvironmentFile=/opt/xiaofeimao/cloud_function/ws-server/.env
+ExecStart=/opt/xiaofeimao/cloud_function/ws-server/venv/bin/python3 /opt/xiaofeimao/cloud_function/ws-server/main.py
 Restart=always
 RestartSec=10
 StandardOutput=journal
