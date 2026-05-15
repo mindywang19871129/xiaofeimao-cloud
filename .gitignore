@@ -14,6 +14,8 @@ venv/
 .env
 *.env
 deploy.sh
+deploy-all.sh
+CLOUD_MIGRATION_PLAN.md
 
 # IDE
 .vscode/
