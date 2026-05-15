@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日学习卷 · 数学+英语 · 5月13日</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0efe8;color:#2c2c2a;line-height:1.7}
+.wrap{max-width:800px;margin:0 auto;padding:16px}
+.sh{background:#fff;border-radius:12px;padding:28px 32px;margin-bottom:24px;border:.5px solid rgba(0,0,0,.08);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.hd{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-bottom:14px;border-bottom:3px solid #e8e6d6;margin-bottom:22px}
+.ti{font-size:20px;font-weight:600}.si{font-size:12px;color:#888780;font-weight:500}
+h2.s{font-size:15px;font-weight:600;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
+h2.s::before{content:'';display:inline-block;width:4px;height:18px;border-radius:2px}
+h2.s.m::before{background:#1d9e75}h2.s.e::before{background:#185fa5}
+.ins{color:#666;font-size:13px;margin-bottom:14px;padding-left:12px;border-left:3px solid #ddd}
+.q{margin-bottom:18px;padding:14px 16px;background:#fafaf7;border-radius:8px;border:.5px solid #eee}
+.qn{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;background:#e8e6d6;border-radius:50%;font-size:13px;font-weight:600;color:#555;float:left;margin-right:10px;margin-top:1px}
+.qb{overflow:hidden;font-size:14px;color:#333}.qb b{color:#c44}
+.bi{min-width:50px;height:28px;border:none;border-bottom:2px solid #999;text-align:center;font-size:15px;color:#185fa5;font-weight:600;background:transparent;outline:none}
+.bi:focus{border-bottom-color:#185fa5;background:rgba(232,241,251,.4)}
+.ta{width:100%;min-height:48px;border:1.5px solid #ddd;border-radius:6px;padding:8px 12px;font-size:14px;resize:vertical;outline:none;margin-top:6px}
+.ta:focus{border-color:#185fa5}
+.olst{list-style:none;padding:0;margin-top:10px}
+.olst li{padding:8px 14px;margin-bottom:6px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13.5px;cursor:pointer;transition:all .15s}
+.olst li:hover{border-color:#bbb;background:#fafafa}
+.olst li.sl{border-color:#185fa5;background:#e8f4fd;color:#0c447c;font-weight:600}
+.oli{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border:1.5px solid #999;border-radius:50%;font-size:11px;margin-right:8px;font-weight:600}
+.sl>.oli{border-color:#185fa5;background:#185fa5;color:#fff}
+.wc{display:inline-block;padding:6px 14px;margin:4px 4px 4px 0;border:1.5px solid #ddd;border-radius:6px;font-size:14px;cursor:pointer;transition:all .15s;vertical-align:top}
+.wc:hover{border-color:#185fa5;background:#f0f7ff}
+.wc .we{font-weight:600;color:#185fa5;font-size:15px}
+.wc .wp{font-size:11px;color:#999;margin-left:3px}
+.wc .wcn{color:#555;font-size:12.5px;margin-left:4px}
+.wc.ok{opacity:.45;text-decoration:line-through}
+.gb{background:#f0f7ff;border:1.5px solid #b5d4f4;border-radius:10px;padding:18px 20px;margin:12px 0 18px}
+.gb .gt{font-size:15px;font-weight:600;color:#0c447c;margin-bottom:10px}
+.gb .gr{font-size:13.5px;color:#333;margin-bottom:8px;padding-left:14px;border-left:3px solid #85b7eb}
+.gb .ge{background:#fff;border-radius:6px;padding:12px 14px;margin:8px 0;font-size:13.5px}
+.gb .gee{color:#185fa5;font-weight:500}.gb .gcn{color:#777;font-size:12.5px;margin-left:8px}
+.ls{background:#f0fdf4;border:1.5px solid #9fe1cb;border-radius:10px;padding:18px 20px;margin:12px 0}
+.ls .lt{font-size:14px;font-weight:600;color:#0f6e56;margin-bottom:10px}
+.ls .ll{font-size:13.5px;margin:6px 0;padding:4px 0}
+.ls .sp{font-weight:600;color:#0f6e56}
+.ra{background:#fef8f0;border:1.5px solid #f5c4b3;border-radius:10px;padding:18px 20px;margin:12px 0}
+.ra .rt{font-size:14px;font-weight:600;color:#993c1d;margin-bottom:10px}
+.ra .rx{font-size:15px;line-height:2;color:#333}
+.ra .rx em{color:#993c1d;font-style:normal;font-weight:600;background:#fceee7;padding:1px 5px;border-radius:3px}
+.abtn{cursor:pointer;font-size:12px;color:#888780;padding:4px 10px;border:1px solid #ddd;border-radius:4px;display:inline-block;margin-top:6px}.abtn:hover{background:#fafafa}
+.ans{display:none;background:#fffdf5;border:1.5px solid #fac775;border-radius:8px;padding:14px 18px;margin-top:10px;font-size:13.5px}.ans.show{display:block}
+.ans .al{color:#854f0b;font-weight:600}
+.scsec{background:#faf8f0;border-radius:10px;padding:18px 22px;margin-top:20px;border:.5px solid #eee}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:10px}
+.scc{text-align:center;padding:12px;background:white;border-radius:8px;border:.5px solid #eee}
+.scv{font-size:22px;font-weight:600}.scl{font-size:11px;color:#999;margin-top:2px}
+.tot{text-align:center;padding:16px;background:#fffde7;border-radius:8px;border:1.5px solid #fac775;margin-top:14px}
+.tn{font-size:36px;font-weight:700;color:#ba7517}.tl{font-size:13px;color:#854f0b;margin-top:4px}
+.pb{position:fixed;top:12px;right:12px;z-index:99;padding:8px 16px;background:#2c2c2a;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}.pb:hover{background:#444}
+@media print{.pb{display:none!important}.sh{break-inside:avoid}}
+@media(max-width:600px){.sh{padding:18px 16px}.ti{font-size:17px}}
+table{border-collapse:collapse}td{padding:5px 4px;vertical-align:middle}
+label{cursor:pointer}
+</style>
+</head>
+<body>
+<button class="pb" onclick="window.print()">🖨️ 打印 / PDF</button>
+<div class="wrap">
+
+<!-- ==================== 卷一：数学 ==================== -->
+<div class="sh">
+<div class="hd"><div class="ti">📐 数学三年级专题小卷</div><div class="si">2026年5月13日（周三）| 时限40分钟 | 满分100分</div></div>
+<p class="ins">姓名：<span style="display:inline-block;min-width:60px;border-bottom:2px solid #888"></span> 班级：<span style="display:inline-block;min-width:40px;border-bottom:2px solid #888"></span> 得分：<span style="display:inline-block;min-width:40px;border-bottom:2px solid #888"></span></p>
+
+<h2 class="s m">一、口算速算（每题2分，共20分）</h2>
+<p class="ins" style="margin-bottom:12px">直接写出得数。</p>
+<div class="q"><div class="qb" style="font-size:14px;line-height:2.4">
+<table><tbody><tr><td>①45+38=<input class="bi"></td><td>②72-27=<input class="bi"></td><td>③120×4=<input class="bi"></td><td>④96÷3=<input class="bi"></td></tr>
+<tr><td>⑤250+370=<input class="bi"></td><td>⑥800-165=<input class="bi"></td><td>⑦15×6=<input class="bi"></td><td>⑧84÷4=<input class="bi"></td></tr>
+<tr><td>⑨360÷9=<input class="bi"></td><td>⑩200×5-300=<input class="bi"></td></tr></tbody></table>
+</div></div>
+
+<h2 class="s m">二、脱式计算（每题6分，共18分）</h2>
+<p class="ins">写出每一步的计算过程。</p>
+<div class="q"><div class="qn">1</div><div class="qb"><b>256+(320-180)÷14</b><br><br>第一步（括号内）：320-180=<input class="bi" style="width:70px"><br><br>第二步（除法）：÷14=<input class="bi" style="width:70px"><br><br>第三步（加法）：256+<input class="bi" style="width:70px">=<b style="color:#c44;font-size:17px">?</b></div></div>
+<div class="q"><div class="qn">2</div><div class="qb"><b>(125+175)×4-500</b><br><br>第一步：125+175=<input class="bi" style="width:70px"><br><br>第二步：×4=<input class="bi" style="width:70px"><br><br>第三步：-500=<b style="color:#c44;font-size:17px">?</b></div></div>
+<div class="q"><div class="qn">3</div><div class="qb"><b>720÷(15-9)×8</b><br><br>最终结果=<input class="bi" style="width:90px"></div></div>
+
+<h2 class="s m">三、轴对称图形（共22分）</h2>
+<div class="q"><div class="qn">4</div><div class="qb">判断哪些是<b>轴对称图形</b>？是的打√，不是打×。（每题2分，共10分）</div></div>
+<ul class="olst q4o" style="max-width:480px">
+<li data-i="0"><span class="oli">A</span>正方形 &nbsp;&nbsp;&nbsp;（&nbsp;&nbsp;&nbsp;）</li>
+<li data-i="1"><span class="oli">B</span>平行四边形 &nbsp;（&nbsp;&nbsp;&nbsp;）</li>
+<li data-i="2"><span class="oli">C</span>等腰三角形 &nbsp;（&nbsp;&nbsp;&nbsp;）</li>
+<li data-i="3"><span class="oli">D</span>圆形 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（&nbsp;&nbsp;&nbsp;）</li>
+<li data-i="4"><span class="oli">E</span>字母"S" &nbsp;&nbsp;&nbsp;（&nbsp;&nbsp;&nbsp;）</li>
+</ul>
+<div class="q"><div class="qn">5</div><div class="qb"><b>画图题（12分）</b>—在方格中画<b>两个不同的轴对称图形</b>并标出对称轴。<br>
+<svg width="320" height="180" viewBox="0 0 320 180" style="border:1.5px solid #ccc;border-radius:6px;margin-top:10px;background:#fff">
+<g stroke="#eee" stroke-width=".5"><line x1="0" y1="0" x2="320" y2="0"/><line x1="0" y1="20" x2="320" y2="20"/><line x1="0" y1="40" x2="320" y2="40"/><line x1="0" y1="60" x2="320" y2="60"/><line x1="0" y1="80" x2="320" y2="80"/><line x1="0" y1="100" x2="320" y2="100"/><line x1="0" y1="120" x2="320" y2="120"/><line x1="0" y1="140" x2="320" y2="140"/><line x1="0" y1="160" x2="320" y2="160"/><line x1="0" y1="180" x2="320" y2="180"/></g>
+<g stroke="#eee" stroke-width=".5"><line x1="0" y1="0" x2="0" y2="180"/><line x1="20" y1="0" x2="20" y2="180"/><line x1="40" y1="0" x2="40" y2="180"/><line x1="60" y1="0" x2="60" y2="180"/><line x1="80" y1="0" x2="80" y2="180"/><line x1="100" y1="0" x2="100" y2="180"/><line x1="120" y1="0" x2="120" y2="180"/><line x1="140" y1="0" x2="140" y2="180"/><line x1="160" y1="0" x2="160" y2="180"/><line x1="180" y1="0" x2="180" y2="180"/><line x1="200" y1="0" x2="200" y2="180"/><line x1="220" y1="0" x2="220" y2="180"/><line x1="240" y1="0" x2="240" y2="180"/><line x1="260" y1="0" x2="260" y2="180"/><line x1="280" y1="0" x2="280" y2="180"/><line x1="300" y1="0" x2="300" y2="180"/><line x1="320" y1="0" x2="320" y2="180"/></g>
+<g stroke="#ccc" stroke-width="1"><line x1="0" y1="0" x2="320" y2="0"/><line x1="0" y1="180" x2="320" y2="180"/><line x1="0" y1="0" x2="0" y2="180"/><line x1="320" y1="0" x2="320" y2="180"/></g>
+<text x="160" y="196" text-anchor="middle" fill="#bbb" font-size="11">（在此处画两个轴对称图形并标出对称轴）</text>
+</svg></div></div>
+
+<h2 class="s m">四、解决问题（每题10分，共30分）</h2>
+<div class="q"><div class="qn">6</div><div class="qb">老师买了<b>5盒彩色笔</b>，每盒<b>12支</b>。<br><br>①一共买了多少支？答：<input class="bi" style="width:65px">支<br><br>②平均分给<b>4个班</b>，每班几支？剩几支？<br>&nbsp;&nbsp;每班<input class="bi" style="width:55px">支，还剩<input class="bi" style="width:55px">支。</div></div>
+<div class="q"><div class="qn">7</div><div class="qb">轴对称徽标外形是长方形，长<b>15cm</b>，宽<b>8cm</b>。<br><ol style="margin:8px 0 8px 22px;font-size:13.5px;line-height:2"><li>周长是多少厘米？（4分）答：<input class="bi" style="width:65px">cm</li><li>沿对称轴对折能重合吗？（2分）<input class="bi" style="width:50px"></li><li>装饰边至少要多长？（4分）答：<input class="bi" style="width:65px">cm</li></ol></div></div>
+<div class="q"><div class="qn">8</div><div class="qb">商品价格：
+<table style="width:100%;font-size:13.5px;margin:8px 0"><tbody><tr style="background:#fafaf7"><td style="padding:6px 12px;border:1px solid #eee;font-weight:600">商品</td><td style="padding:6px 12px;border:1px solid #eee;font-weight:600">单价</td><td style="padding:6px 12px;border:1px solid #eee;font-weight:600">数量</td></tr><tr><td style="padding:6px 12px;border:1px solid #eee">笔记本</td><td style="padding:6px 12px;border:1px solid #eee">8元/本</td><td style="padding:6px 12px;border:1px solid #eee">买6本</td></tr><tr><td style="padding:6px 12px;border:1px solid #eee">彩笔套装</td><td style="padding:6px 12px;border:1px solid #eee">15元/盒</td><td style="padding:6px 12px;border:1px solid #eee">买3盒</td></tr><tr><td style="padding:6px 12px;border:1px solid #eee">橡皮</td><td style="padding:6px 12px;border:1px solid #eee">2元/块</td><td style="padding:6px 12px;border:1px solid #eee">买10块</td></tr></tbody></table>
+综合算式：<input class="bi" style="width:250px"> = <input class="bi" style="width:75px">元</div></div>
+
+<h2 class="s m">五、小小设计师·思考（10分）</h2>
+<div class="q"><div class="qn">9</div><div class="qb"><ol style="margin:8px 0 8px 22px;font-size:13.5px;line-height:2.2"><li>提交作品的截止日期？（2分）<textarea class="ta" style="min-height:26px"></textarea></li><li>故宫博物院徽标下半部分是什么类型图形？（2分）<input class="bi" style="width:130px"></li><li>如果设计轴对称校徽，你会选什么主题？为什么？（6分）</li></ol><textarea class="ta" placeholder="写下你的想法..."></textarea></div></div>
+
+<button class="abtn" onclick="document.getElementById('mans').classList.toggle('show')">查看数学参考答案 ▼</button>
+<div class="ans" id="mans">
+<div style="margin:4px 0"><span class="al">一、</span>①83 ②45 ③480 ④32 ⑤620 ⑥635 ⑦90 ⑧21 ⑨40 ⑩700</div>
+<div style="margin:4px 0"><span class="al">二、1.</span>140 → 10 → <b>266</b> &nbsp; <span class="al">2.</span>300 → 1200 → <b>700</b> &nbsp; <span class="al">3.</span><b>960</b>(720÷6×8)</div>
+<div style="margin:4px 0"><span class="al">三、4.</span>A√ B× C√ D√ E× &nbsp; <span class="al">5.</span>开放题，画两个轴对称图形+标对称轴即可得分</div>
+<div style="margin:4px 0"><span class="al">四、6.</span>60支；每班15支；剩0支 &nbsp; <span class="al">7.</span>①46cm ②能 ③46cm &nbsp; <span class="al">8.</span>8×6+15×3+2×10 = 48+45+20 = <b>113元</b></div>
+<div style="margin:4px 0"><span class="al">五、9.</span>①4月25日前 ②轴对称图形 ③开放答案，言之有理即可</div>
+</div>
+<div class="scsec"><div style="font-size:14px;font-weight:600">数学得分统计</div>
+<div class="sg"><div class="scc"><div class="scv">/20</div><div class="scl">口算</div></div><div class="scc"><div class="scv">/18</div><div class="scl">混合运算</div></div><div class="scc"><div class="scv">/22</div><div class="scl">轴对称</div></div><div class="scc"><div class="scv">/30</div><div class="scl">应用题</div></div><div class="scc"><div class="scv">/10</div><div class="scl">思考</div></div></div>
+<div class="tot"><div class="tn">/100</div><div class="tl">数学总分</div></div></div>
+</div><!-- end math -->
+
+<!-- ==================== 卷二：英语 KET ==================== -->
+<div class="sh">
+<div class="hd"><div class="ti">📚 英语KET备考 Day1 学习卷</div><div class="si">2026年5月13日 | 基础夯实期 | 用时60-90分钟 | 满分100分</div></div>
+<p class="ins">姓名：<span style="display:inline-block;min-width:60px;border-bottom:2px solid #888"></span> 今日目标：掌握15词 + 一般现在时
+
+<!-- ===== Part A 单词 ===== -->
+<h2 class="s e">Part A · 今日必背单词（15个）</h2>
+<p class="ins" style="margin-bottom:14px">点击单词可标记为"已掌握"。记住拼写、词性和中文意思。</p>
+<div style="margin-bottom:6px">
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">1.festival</span><span class="wp">n.</span><span class="wcn">节日</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">2.design</span><span class="wp">v./n.</span><span class="wcn">设计</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">3.symbol</span><span class="wp">n.</span><span class="wcn">标志；象征</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">4.symmetry</span><span class="wp">n.</span><span class="wcn">对称</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">5.collect</span><span class="wp">v.</span><span class="wcn">收集</span></span>
+</div><div style="margin-bottom:6px">
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">6.submit</span><span class="wp">v.</span><span class="wcn">提交</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">7.celebrate</span><span class="wp">v.</span><span class="wcn">庆祝</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">8.palace</span><span class="wp">n.</span><span class="wcn">宫殿</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">9.museum</span><span class="wp">n.</span><span class="wcn">博物馆</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">10.wing</span><span class="wp">n.</span><span class="wcn">翅膀</span></span>
+</div><div>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">11.embrace</span><span class="wp">v.</span><span class="wcn">拥抱</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">12.future</span><span class="wp">n.</span><span class="wcn">未来</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">13.artwork</span><span class="wp">n.</span><span class="wcn">艺术品</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">14.creative</span><span class="wp">adj.</span><span class="wcn">有创意的</span></span>
+<span class="wc" onclick="this.classList.toggle('ok')"><span class="we">15.growth</span><span class="wp">n.</span><span class="wcn">成长</span></span>
+</div>
+
+<!-- Part A' 单词测试 -->
+<h2 class="s e" style="margin-top:22px">Part A' · 单词默写测试（15分，每词1分）</h2>
+<p class="ins">根据中文意思写出英文单词。</p>
+<div class="q"><div class="qb"><table style="width:100%;font-size:13.5px"><tbody>
+<tr><td style="width:72px">节日</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="width:68px;padding-left:12px">设计</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="width:64px;padding-left:12px">收集</td><td>→</td><td><input class="bi" style="width:105px"></td></tr>
+<tr><td>对称</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">提交</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">庆祝</td><td>→</td><td><input class="bi" style="width:105px"></td></tr>
+<tr><td>宫殿</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">翅膀</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">未来</td><td>→</td><td><input class="bi" style="width:105px"></td></tr>
+<tr><td>拥抱</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">有创意的</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">成长</td><td>→</td><td><input class="bi" style="width:105px"></td></tr>
+<tr><td>标志/象征</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">博物馆</td><td>→</td><td><input class="bi" style="width:105px"></td><td style="padding-left:12px">艺术品</td><td>→</td><td><input class="bi" style="width:105px"></td></tr>
+</tbody></table></div></div>
+
+<!-- Part B 语法 -->
+<h2 class="s e" style="margin-top:24px">Part B · 语法专题：一般现在时 (Simple Present Tense)</h2>
+<div class="gb">
+<div class="gt">什么是一般现在时？</div>
+<div class="gr"><b>用法1：</b>描述经常发生的动作或习惯<br>例：<span class="gee">I go to school every day.</span> <span class="gcn">(我每天去上学)</span></div>
+<div class="gr"><b>用法2：</b>描述客观事实<br>例：<span class="gee">The sun rises in the east.</span> <span class="gcn">(太阳从东方升起)</span></div>
+<div class="gr"><b>用法3：</b>表示主语的特征或状态<br>例：<span class="gee">She likes art very much.</span> <span class="gcn">(她非常喜欢艺术)</span></div>
+<div class="gt" style="margin-top:14px">★ 重要规则：第三人称单数 (he/she/it/人名/单数名词) 动词要变！</div>
+<div class="gr">① 一般情况直接加 s：work→works, play→plays, design→designs</div>
+<div class="gr">② 以 s/x/ch/sh/o 结尾加 es：watch→watches, go→goes, celebrate→celebrates</div>
+<div class="gr">③ 辅音+y结尾 → 变y为i+es：study→studies, fly→flies</div>
+<div class="gr" style="color:#c44;font-weight:600">特别注意：have → has （不规则变化！）</div>
+<div class="ge" style="margin-top:10px">
+<span class="gee">He designs beautiful logos for our school.</span> <span class="gcn">他为我们学校设计漂亮的标志。</span><br>
+<span class="gee">She collects stamps from different countries.</span> <span class="gcn">她收集来自不同国家的邮票。</span><br>
+<span class="gee">The museum has many old paintings.</span> <span class="gcn">这座博物馆有很多古画。</span>
+</div>
+<div class="gt" style="margin-top:14px">否定句和疑问句：借助 do / does</div>
+<div class="gr">否定句：主语 + <b style="color:#c44">don't / doesn't</b> + 动词原形<br>例：He <b style="color:#c44">doesn't like</b> maths. 他不喜欢数学。</div>
+<div class="gr">一般疑问句：<b style="color:#c44">Do / Does</b> + 主语 + 动词原形...?<br>例：<b style="color:#c44">Does</b> she collect stamps? 她收集邮票吗？</div>
+<div class="gr">回答：Yes, she does. / No, she doesn't.</div>
+</div>
+
+<!-- Part B' 语法练习 -->
+<h2 class="s e" style="margin-top:20px">Part B' · 语法填空练习（20分，每题2分）</h2>
+<p class="ins">用括号内动词的正确形式填空。</p>
+<div class="q"><div class="qn">1</div><div class="qb"><table style="width:100%;font-size:13.5px"><tbody>
+<tr><td>(1) She ________ (design) beautiful logos for school.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(2) They ________ (collect) old stamps every weekend.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(3) My brother ________ (not watch) TV on school nights.</td><td><input class="bi" style="width:115px"></td></tr>
+<tr><td>(4) The art festival ________ (start) on May 5th.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(5) ________ you ________ (like) drawing pictures?</td><td><input class="bi" style="width:55px"> <input class="bi" style="width:95px"></td></tr>
+<tr><td>(6) He usually ________ (submit) his work before Friday.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(7) We ________ (celebrate) New Year with family.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(8) This museum ________ (have) many old paintings.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(9) Her wings ________ (look) very beautiful in sunlight.</td><td><input class="bi" style="width:95px"></td></tr>
+<tr><td>(10) ________ your friend ________ (study) English daily?</td><td><input class="bi" style="width:55px"> <input class="bi" style="width:95px"></td></tr>
+</tbody></table></div></div>
+
+<!-- Part B'' 翻译练习 -->
+<div class="q"><div class="qn">2</div><div class="qb"><b>汉译英（每题2分，共10分）</b> — 使用一般现在时翻译。
+<table style="width:100%;font-size:13.5px"><tbody>
+<tr><td style="vertical-align:top;width:24px">①</td><td>他收集了很多有趣的徽标。<br><textarea class="ta" style="min-height:34px" placeholder="英文..."></textarea></td></tr>
+<tr><td style="vertical-align:top">②</td><td>这些徽标在设计上有什么特点？<br><textarea class="ta" style="min-height:34px" placeholder="英文..."></textarea></td></tr>
+<tr><td style="vertical-align:top">③</td><td>我们也可以运用轴对称图形来设计。<br><textarea class="ta" style="min-height:34px" placeholder="英文..."></textarea></td></tr>
+<tr><td style="vertical-align:top">④</td><td>她不在这个周末提交作品。<br><textarea class="ta" style="min-height:34px" placeholder="英文..."></textarea></td></tr>
+<tr><td style="vertical-align:top">⑤</td><td>你的朋友每天学英语吗？<br><textarea class="ta" style="min-height:34px" placeholder="英文..."></textarea></td></tr>
+</tbody></table></div></div>
+
+<!-- Part C 听力 -->
+<h2 class="s e" style="margin-top:24px">Part C · 听力训练（25分）</h2>
+<p class="ins">步骤：先看题 → 播放音频或由家长朗读下方脚本（听两遍）→ 完成题目。</p>
+
+<div class="ls">
+<div class="lt">📻 听力脚本（供家长朗读 / 自读精听练习）</div>
+<div class="ll"><span class="sp">Woman:</span> Good morning, everyone! Welcome to our school Art Festival meeting.</div>
+<div class="ll"><span class="sp">Man:</span> When does the festival start, Sarah?</div>
+<div class="ll"><span class="sp">Sarah:</span> It starts on May the fifth and ends on May the twentieth.</div>
+<div class="ll"><span class="sp">Man:</span> That's great! I heard we are collecting logo designs.</div>
+<div class="ll"><span class="sp">Sarah:</span> That's right! Everyone can submit their design before April twenty-fifth.</div>
+<div class="ll"><span class="sp">Man:</span> Can you tell me about some famous logos?</div>
+<div class="ll"><span class="sp">Sarah:</span> Sure! The Beijing Olympics symbol — five rings show harmony, and the Chinese seal shows movement.</div>
+<div class="ll"><span class="sp">Man:</span> What about the Palace Museum logo?</div>
+<div class="ll"><span class="sp">Sarah:</span> The top looks like sea waves holding a jade disc, and the bottom is a symmetrical shape — an axis-symmetric figure!</div>
+<div class="ll"><span class="sp">Man:</span> Amazing! And look at our school's art festival logo...</div>
+<div class="ll"><span class="sp">Sarah:</span> Yes! "Growing in the world of art, spreading wings to embrace the future." It shows the beauty of symmetry.</div>
+<div class="ll" style="color:#0f6e56;font-weight:600;margin-top:10px">— End of listening —</div>
+</div>
+
+<div class="q"><div class="qn">1</div><div class="qb"><b>选择题（每题3分，共15分）</b></div></div>
+<ul class="olst lopts" style="max-width:560px">
+<li data-i="0"><span class="oli">Q1</span>When does the art festival start?<br><span style="font-size:12.5px;color:#666;margin-left:30px">A. May 5th &nbsp; B. May 15th &nbsp; C. April 25th</span></li>
+<li data-i="1"><span class="oli">Q2</span>What is the deadline for submitting logos?<br><span style="font-size:12.5px;color:#666;margin-left:30px">A. April 25th &nbsp; B. May 5th &nbsp; C. May 20th</span></li>
+<li data-i="2"><span class="oli">Q3</span>What does the Palace Museum logo's bottom part look like?<br><span style="font-size:12.5px;color:#666;margin-left:30px">A. Five rings &nbsp; B. An axis-symmetric figure &nbsp; C. Wings</span></li>
+<li data-i="3"><span class="oli">Q4</span>What does the school festival logo show?<br><span style="font-size:12.5px;color:#666;margin-left:30px">A. Movement only &nbsp; B. Harmony &nbsp; C. The beauty of symmetry</span></li>
+<li data-i="4"><span class="oli">Q5</span>What are they mainly talking about?<br><span style="font-size:12.5px;color:#666;margin-left:30px">A. Sports events &nbsp; B. Art festival logos &nbsp; C. Museums</span></li>
+</ul>
+
+<div class="q"><div class="qn">2</div><div class="qb"><b>听力填空（每空2分，共10分）</b> — 再听一遍填写所缺单词。<table style="width:100%;font-size:13.5px"><tbody>
+<tr><td>(1) The festival starts on May the ______ and ends on May the ______.</td><td><input class="bi" style="width:50px"> <input class="bi" style="width:50px"></td></tr>
+<tr><td>(2) Everyone can ______ their design before April ______.</td><td><input class="bi" style="width:90px"> <input class="bi" style="width:55px"></td></tr>
+<tr><td>(3) The five rings show ______, and the Chinese seal shows ______.</td><td><input class="bi" style="width:90px"> <input class="bi" style="width:90px"></td></tr>
+<tr><td>(4) The bottom of the Palace Museum logo is an ______ figure.</td><td><input class="bi" style="width:130px"></td></tr>
+<tr><td>(5) The school logo shows "spreading wings to ______ the future".</td><td><input class="bi" style="width:110px"></td></tr>
+</tbody></table></div></div>
+
+<!-- Part D 跟读 -->
+<h2 class="s e" style="margin-top:24px">Part D · 跟读与口语练习（15分）</h2>
+<div class="ra">
+<div class="rt">🗣️ 跟读材料（大声朗读3遍，注意语音语调）</div>
+<div class="rx"><em>Art Festival Notice</em><br><br>
+The Fifth School Art Festival will be held from <em>May 5th to May 20th</em>. The Student Union is now collecting logo designs for the festival. If you want to submit your work, please do it before <em>April 25th</em>. We look forward to your creative ideas!<br><br>
+Here are some examples of famous logos:<br>
+The <em>Beijing Olympics symbol</em> uses both symmetric and asymmetric shapes. The <em>Palace Museum logo</em> features an axis-symmetric figure at the bottom. Our school's own festival logo shows the beauty of <em>symmetry</em> — with wings that represent growth in the world of art.
+</div>
+</div>
+<div class="q"><div class="qn">1</div><div class="qb"><b>跟读自查表</b> — 读完后给自己评分（每项3分）
+<table style="width:100%;font-size:13.5px"><tbody>
+<tr><td style="width:220px">发音是否清晰准确？</td><td><label><input type="radio" name="r1" value="3"> 很好(3分)</label> <label style="margin-left:10px"><input type="radio" name="r1" value="2"> 一般(2分)</label> <label style="margin-left:10px"><input type="radio" name="r1" value="1"> 需努力(1分)</label></td></tr>
+<tr><td>语调是否有起伏（不平淡）？</td><td><label><input type="radio" name="r2" value="3"> 很好(3分)</label> <label style="margin-left:10px"><input type="radio" name="r2" value="2"> 一般(2分)</label> <label style="margin-left:10px"><input type="radio" name="r2" value="1"> 需努力(1分)</label></td></tr>
+<tr><td>能否流利读完不停顿？</td><td><label><input type="radio" name="r3" value="3"> 很好(3分)</label> <label style="margin-left:10px"><input type="radio" name="r3" value="2"> 一般(2分)</label> <label style="margin-left:10px"><input type="radio" name="r3" value="1"> 需努力(1分)</label></td></tr>
+<tr><td>斜体关键词是否有重读？</td><td><label><input type="radio" name="r4" value="3"> 是的(3分)</label> <label style="margin-left:10px"><input type="radio" name="r4" value="2"> 部分(2分)</label> <label style="margin-left:10px"><input type="radio" name="r4" value="1"> 没有(1分)</label></td></tr>
+<tr><td>读了3遍以上吗？</td><td><label><input type="radio" name="r5" value="3"> 3遍以上(3分)</label> <label style="margin-left:10px"><input type="radio" name="r5" value="2"> 刚好3遍(2分)</label> <label style="margin-left:10px"><input type="radio" name="r5" value="1"> 不到3遍(1分)</label></td></tr>
+</tbody></table></div></div>
+
+<div class="q"><div class="qn">2</div><div class="qb"><b>口头问答（5分）</b> — 用英语回答：<br><br>
+<b>Q: What kind of logo would you design for the art festival? Why?</b><br><br>
+Your answer:<br><textarea class="ta" style="min-height:60px" placeholder="用英语写下你的回答..."></textarea></div></div>
+
+<!-- Part E 写作 -->
+<h2 class="s e" style="margin-top:24px">Part E · 写作小练（10分）</h2>
+<p class="ins">根据今天学的主题写一段3-5句话的短文。要求使用一般现在时，至少用3个今日所学单词。</p>
+<div class="q"><div class="qb"><b>Topic: My School Art Festival Logo Design</b><br>
+（提示：描述你想设计什么样的标志、用什么形状、代表什么含义等）<br><br>
+<textarea class="ta" style="min-height:100px" placeholder="在此写作文...\n\n参考开头：\nI want to design a logo for our school art festival..."></textarea></div></div>
+<div style="background:#faf8f0;border-radius:8px;padding:14px 18px;margin-top:12px;border:.5px solid #eee">
+<div style="font-size:13px;font-weight:600;margin-bottom:8px">✍️ 写作自检清单</div>
+<label style="display:block;margin:4px 0;font-size:13px"><input type="checkbox"> 用了一般现在时</label>
+<label style="display:block;margin:4px 0;font-size:13px"><input type="checkbox"> 至少用了3个今日单词</label>
+<label style="display:block;margin:4px 0;font-size:13px"><input type="checkbox"> 有3-5句话</label>
+<label style="display:block;margin:4px 0;font-size:13px"><input type="checkbox"> 语句通顺，无大语法错误</label>
+</div>
+
+<!-- 英语答案 -->
+<button class="abtn" onclick="document.getElementById('eans').classList.toggle('show')">查看英语参考答案 ▼</button>
+<div class="ans" id="eans">
+<div style="margin:6px 0"><span class="al">Part A' 默写：</span>festival / design / collect / symmetry / submit / celebrate / palace / wing / future / embrace / creative / growth / symbol / museum / artwork</div>
+<div style="margin:6px 0"><span class="al">Part B' 填空：</span>(1)designs (2)collect (3)doesn't watch (4)starts (5)Do,like (6)submits (7)celebrate (8)has (9)look (10)Does,study</div>
+<div style="margin:6px 0"><span class="al">Part B'' 翻译：</span>
+①He collects many interesting logos.<br>
+②What features do these logos have in design?<br>
+③We can also use axis-symmetric figures to design.<br>
+④She doesn't submit her work this weekend.<br>
+⑤Does your friend study English every day?</div>
+<div style="margin:6px 0"><span class="al">Part C 选择：</span>Q1-A Q2-A Q3-B Q4-C Q5-B</div>
+<div style="margin:6px 0"><span class="al">Part C 填空：</span>(1)fifth,twentieth (2)submit,25th (3)harmony,movement (4)axis/symmetrical/symmetric (5)embrace</div>
+<div style="margin:6px 0"><span class="al">Part D 口语参考：</span>I would design a logo with two symmetrical wings because it shows that students grow and fly high in the world of art. I would also add some colorful patterns to make it look creative.</div>
+<div style="margin:6px 0"><span class="al">Part E 写作参考：</span>I want to design a logo for our school art festival. My design uses symmetry — two beautiful wings that embrace each other. The wings represent growth and creativity. In the center, I will put a paintbrush to show art. I hope everyone likes my <strong>creative</strong> <strong>symbol</strong>.</div>
+</div>
+
+<div class="scsec"><div style="font-size:14px;font-weight:600">英语得分统计</div>
+<div class="sg">
+<div class="scc"><div class="scv">/15</div><div class="scl">单词默写</div></div>
+<div class="scc"><div class="scv">/20</div><div class="scl">语法填空</div></div>
+<div class="scc"><div class="scv">/10</div><div class="scl">汉译英</div></div>
+<div class="scc"><div class="scv">/25</div><div class="scl">听力训练</div></div>
+<div class="scc"><div class="scv">/15</div><div class="scl">跟读口语</div></div>
+<div class="scc"><div class="scv">/10</div><div class="scl">写作小练</div></div>
+</div>
+<div class="tot"><div class="tn">/ 95</div><div class="tl">英语总分（另有5分为家长评价）</div></div>
+<div style="margin-top:12px;text-align:center;font-size:13px;color:#888780">
+家长评价（5分）：☐态度认真 ☐书写工整 ☐按时完成 ☐主动复习 ☐大声朗读
+</div>
+</div>
+
+</div><!-- end wrap -->
+
+<script>
+// 选择题交互
+document.querySelectorAll('.olst').forEach(function(list){list.addEventListener('click',function(e){var li=e.target.closest('li');if(li){var siblings=list.querySelectorAll('li');siblings.forEach(function(s){if(s!==li)s.classList.remove('sl')});li.classList.toggle('sl')}})});
+// 单词卡点击
+</script>
+</body>
+</html>

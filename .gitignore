@@ -1,0 +1,44 @@
+# ===================================
+# 小肥猫学习 - Git 忽略规则
+# ===================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+
+# 环境变量（含敏感凭证，严禁提交）
+.env
+*.env
+deploy.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 运行时生成
+.logs/
+*.log
+
+# 本地归档（不提交，体积大且临时）
+archive/
+
+# WorkBuddy 工作数据
+.workbuddy/
+
+# macOS launchd plist（含本地路径和密钥，Mac 专用）
+com.xiaofeimao.*.plist
+
+# 本地配置文件（含 Bitable token）
+bitable_config.json
+*.tar.gz
+*.zip

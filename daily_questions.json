@@ -1,0 +1,144 @@
+{
+  "date": "2026-05-17",
+  "status": "pending_grading",
+  "total_score": 36,
+  "math": {
+    "subject": "数学",
+    "count": 4,
+    "total_score": 18,
+    "topic": "面积概念与面积单位换算",
+    "questions": [
+      {
+        "id": "M1",
+        "num": 1,
+        "type": "填空题",
+        "score": 4,
+        "content": "填一填。\n(1) 3平方分米 = (    )平方厘米\n(2) 500平方厘米 = (    )平方分米\n(3) 1平方米 = (    )平方分米 = (    )平方厘米",
+        "correct_answer": "(1) 300  (2) 5  (3) 100; 10000",
+        "knowledge_point": "面积单位换算（进率100）",
+        "explanation": "相邻面积单位之间的进率是100。大单位换小单位要乘100，小单位换大单位要除以100。\n(1) 3 dm² = 3 × 100 = 300 cm²\n(2) 500 cm² = 500 ÷ 100 = 5 dm²\n(3) 1 m² = 100 dm² = 100 × 100 = 10000 cm²"
+      },
+      {
+        "id": "M2",
+        "num": 2,
+        "type": "选择题",
+        "score": 4,
+        "content": "下面哪个说法是正确的？请把序号填在括号里。\n① 一个信封的面积大约是200平方分米。\n② 小明的身高是150平方厘米。\n③ 1米 = 100厘米，所以1平方米 = 100平方厘米。\n④ 一本数学书封面的面积大约是5平方分米。",
+        "correct_answer": "④",
+        "knowledge_point": "面积单位的实际感知与面积和长度的区分",
+        "explanation": "① 200平方分米=2平方米，比课桌还大，信封不可能那么大，错。\n② 身高是长度，应该用厘米，不是平方厘米，错。\n③ 1米=100厘米，但面积是边长乘边长，1平方米=100×100=10000平方厘米，不是100，错。\n④ 数学书封面长大约25厘米，宽大约20厘米，面积约500平方厘米=5平方分米，正确。"
+      },
+      {
+        "id": "M3",
+        "num": 3,
+        "type": "应用题",
+        "score": 6,
+        "content": "小丽家的客厅地面是一个长方形，长5米，宽4米。\n(1) 客厅地面的面积是多少平方米？\n(2) 如果选用边长2分米的正方形地砖铺地面，需要多少块地砖？\n（提示：先统一单位）",
+        "correct_answer": "(1) 20平方米  (2) 500块",
+        "knowledge_point": "面积计算与单位换算应用",
+        "explanation": "(1) 长方形面积 = 长 × 宽 = 5 × 4 = 20（平方米）\n(2) 方法一：先统一单位。5米=50分米，4米=40分米。客厅面积 = 50×40 = 2000（平方分米）。一块地砖面积 = 2×2 = 4（平方分米）。需要地砖 = 2000 ÷ 4 = 500（块）。\n方法二：先算平方米，再换算。20平方米 = 2000平方分米，2000÷4=500块。"
+      },
+      {
+        "id": "M4",
+        "num": 4,
+        "type": "画图题",
+        "score": 4,
+        "content": "下面是一个边长为4厘米的正方形。\n(1) 请计算它的周长和面积。\n(2) 在方格纸中（每个小方格边长1厘米），画出一个与这个正方形面积相同，但形状不同的图形。\n\n（方格纸示意图，每个□代表1平方厘米）\n□ □ □ □\n□ □ □ □\n□ □ □ □\n□ □ □ □",
+        "correct_answer": "(1) 周长=16厘米，面积=16平方厘米\n(2) 答案不唯一，例如长8厘米、宽2厘米的长方形（面积=8×2=16平方厘米）",
+        "knowledge_point": "区分面积与周长；面积守恒",
+        "explanation": "(1) 正方形周长=边长×4=4×4=16（厘米）；正方形面积=边长×边长=4×4=16（平方厘米）。注意：周长是长度，用厘米；面积是大小，用平方厘米。\n(2) 面积相同但形状不同，可以画长8厘米、宽2厘米的长方形，因为8×2=16平方厘米。也可以画其他图形，只要面积是16平方厘米。"
+      }
+    ]
+  },
+  "english": {
+    "subject": "英语KET",
+    "count": 4,
+    "total_score": 18,
+    "grammar_topic": "现在完成时 have/has done",
+    "new_words": [
+      "should",
+      "must",
+      "may",
+      "might",
+      "needn't",
+      "ability",
+      "permission",
+      "advice",
+      "rule",
+      "possible"
+    ],
+    "questions": [
+      {
+        "id": "E1",
+        "num": 1,
+        "type": "单词默写/翻译",
+        "score": 4,
+        "content": "请写出下列中文对应的英文单词（每个1分）。\n(1) 应该 ________\n(2) 必须 ________\n(3) 允许 ________\n(4) 规则 ________",
+        "correct_answer": "(1) should  (2) must  (3) permission  (4) rule",
+        "answer_format": "依次写出单词，用逗号或空格隔开。例如：should, must, permission, rule",
+        "knowledge_point": "新单词拼写",
+        "explanation": "这些是今天新学的情态动词和名词。should表示'应该'，must表示'必须'，permission是'允许'的名词形式，rule是'规则'。",
+        "scoring_criteria": [
+          "每个单词1分，拼写完全正确得分",
+          "大小写不扣分"
+        ]
+      },
+      {
+        "id": "E2",
+        "num": 2,
+        "type": "语法填空",
+        "score": 4,
+        "content": "用括号内动词的现在完成时形式填空。\n(1) I ________ (finish) my homework already. 我可以去踢球了。\n(2) She ________ (not eat) lunch yet. 她还不饿。\n(3) ________ you ever ________ (be) to Beijing? 没有，但我很想去。\n(4) My grandparents ________ (live) in this city for 20 years.",
+        "correct_answer": "(1) have finished  (2) has not eaten / hasn't eaten  (3) Have; been  (4) have lived",
+        "answer_format": "依次写出答案，如：have finished, hasn't eaten, Have been, have lived",
+        "knowledge_point": "现在完成时 have/has done",
+        "explanation": "现在完成时结构：have/has + 过去分词。\n(1) I是主语，用have，finish的过去分词是finished。already表示'已经'。\n(2) She是第三人称单数，用has，否定加not。eat的过去分词是eaten。yet用于否定句。\n(3) 疑问句把have提前，ever表示'曾经'，be的过去分词是been。\n(4) grandparents是复数，用have，live的过去分词是lived。for+时间段表示持续。",
+        "scoring_criteria": [
+          "每个空1分，时态和主谓一致正确得分",
+          "缩写形式（如hasn't）也算对"
+        ]
+      },
+      {
+        "id": "E3",
+        "num": 3,
+        "type": "句子翻译/造句",
+        "score": 5,
+        "content": "请用所给单词和现在完成时造句（每个句子1分，单词使用正确0.5分，语法正确0.5分）。\n(1) should / advice — 你应该听听父母的建议。\n(2) may / permission — 我可能已经得到了老师的允许。\n(3) might / possible — 他可能已经完成了作业，这是可能的。\n(4) must / rule — 我们必须遵守规则。\n(5) needn't / worry — 你不必担心，我已经准备好了一切。",
+        "correct_answer": "(1) You should listen to your parents' advice.  (2) I may have got the teacher's permission.  (3) He might have finished his homework. It is possible.  (4) We must follow the rules.  (5) You needn't worry. I have prepared everything.",
+        "answer_format": "写出完整的英文句子，每句一行。",
+        "knowledge_point": "现在完成时与新词综合运用",
+        "explanation": "注意情态动词后接动词原形，但表示对过去的推测时用'may/might have done'结构。现在完成时表示已经完成的动作。\n(1) should + 动词原形\n(2) may + have + 过去分词，表示'可能已经'\n(3) might + have + 过去分词，possible作表语\n(4) must + 动词原形\n(5) needn't + 动词原形，现在完成时在从句中",
+        "scoring_criteria": [
+          "每个句子1分：单词使用正确0.5分，语法（时态、情态动词用法）正确0.5分",
+          "拼写错误每个扣0.25分，最多扣0.5分"
+        ]
+      },
+      {
+        "id": "E4",
+        "num": 4,
+        "type": "阅读理解简答",
+        "score": 5,
+        "content": "读下面的短文，回答后面的问题。\n\nTom is a student. He has just finished his homework. Now he wants to play outside. But his mom says, \"You must clean your room first. It is a rule in our family.\" Tom thinks it is good advice. He has already cleaned his room. Now he has permission to go out. He might play football with his friends. He has never played football before, but he has the ability to learn. It is possible that he will enjoy it.\n\n问题：\n(1) What has Tom just finished? (1分)\n(2) Why must Tom clean his room? (1分)\n(3) Has Tom ever played football before? (1分)\n(4) 从短文中找出一个现在完成时的句子，并抄写下来。(2分)",
+        "correct_answer": "(1) He has just finished his homework.  (2) Because it is a rule in his family.  (3) No, he hasn't. / No, he has never played football before.  (4) 答案不唯一，例如：He has just finished his homework. / He has already cleaned his room. / He has never played football before.",
+        "answer_format": "用完整句子回答，或者按照题目要求。第(4)题直接抄写句子。",
+        "knowledge_point": "阅读理解；现在完成时在语境中的运用",
+        "explanation": "短文包含了今天学的所有新词（should, must, may, might, needn't, ability, permission, advice, rule, possible）和现在完成时。\n(1) 第一句直接给出答案。\n(2) 妈妈的话里明确说了'It is a rule'。\n(3) 文中说'He has never played football before'，所以是否定的。\n(4) 只要含有have/has+过去分词结构的句子都正确。",
+        "scoring_criteria": [
+          "(1)(2)(3)每题1分，答案正确完整得分",
+          "(4)题2分：抄写正确得1分，句子是现在完成时得1分"
+        ]
+      }
+    ]
+  },
+  "_grading_notes": {
+    "parent_answer_format_hint": "家长通常用 |题号|答案| 格式提交答案。数学题答案通常是数字或算式；英语单词默写答案是英文单词（多个用/分隔）；语法填空答案用/分隔；作文是完整英文段落。",
+    "common_variations": [
+      "|M1|300,5,100,10000|格式",
+      "M1=300/5/100/10000格式",
+      "纯数字顺序格式",
+      "科目前缀格式"
+    ]
+  },
+  "generated_at": "2026-05-15T09:01:01.602889",
+  "day_offset": 4
+}

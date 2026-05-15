@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📝 学习卷样式测试 · 每科一题</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f3ee;color:#2c2c2a;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+.hd{text-align:center;padding:20px 0 16px;border-bottom:3px solid #e8e6d6;margin-bottom:20px}
+.hd h1{font-size:22px;font-weight:700;color:#2c2c2a}.hd p{font-size:12px;color:#999;margin-top:4px}
+
+/* 科目卡片 */
+.subj{background:#fff;border-radius:14px;padding:24px 28px;margin-bottom:20px;border:.5px solid rgba(0,0,0,.07);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.subj-hd{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #f0eee6}
+.subj-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.math-icon{background:linear-gradient(135deg,#1d9e75,#17a084)}.eng-icon{background:linear-gradient(135deg,#185fa5,#2980b9)}
+.subj-title{font-size:17px;font-weight:700}.subjscore{margin-left:auto;font-size:12px;background:#f8f6f0;padding:3px 10px;border-radius:10px;color:#888}
+
+/* 题目区域 */
+.q{padding:14px 16px;background:#fafaf7;border-radius:10px;border:1.5px solid #eee;margin-bottom:14px}
+.qn{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;background:#e8e6d6;border-radius:50%;font-size:13px;font-weight:600;color:#555;float:left;margin-right:10px;margin-top:2px}
+.qb{overflow:hidden;font-size:15px;line-height:1.9;color:#333}
+
+/* 输入框 */
+.bi{min-width:55px;height:30px;border:none;border-bottom:2px solid #bbb;text-align:center;font-size:16px;color:#185fa5;font-weight:600;background:transparent;outline:none;border-radius:0;transition:border-color .2s}
+.bi:focus{border-bottom-color:#185fa5;background:rgba(232,241,251,.35)}
+.bi.correct{border-bottom-color:#27ae60;color:#27ae60}
+.bi.wrong{border-bottom-color:#e74c3c;color:#e74c3c}
+.ta{width:100%;min-height:50px;border:1.5px solid #ddd;border-radius:8px;padding:10px 14px;font-size:14.5px;resize:vertical;outline:none;margin-top:8px;transition:border .2s}
+.ta:focus{border-color:#185fa5}
+.ta.correct{border-color:#27ae60;background:#f0fff4}.ta.wrong{border-color:#e74c3c;background:#fff8f8}
+
+/* 选择题 */
+.olst{list-style:none;padding:0;margin-top:10px}
+.olst li{padding:10px 14px;margin-bottom:6px;border:2px solid #e8e8e8;border-radius:8px;font-size:14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
+.olst li:hover{border-color:#bbb;background:#fafafa}
+.olst li.sl{border-color:#185fa5;background:#e8f4fd;color:#0c447c;font-weight:600}
+.oli{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border:2px solid #ccc;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0}
+.sl>.oli{border-color:#185fa5;background:#185fa5;color:#fff}
+
+/* 提交按钮 */
+.submit-bar{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:14.5px;font-weight:600;cursor:pointer;transition:all .2s;flex:1;max-width:200px;text-align:center}
+.btn-primary{background:#185fa5;color:#fff;box-shadow:0 2px 8px rgba(24,95,165,.25)}
+.btn-primary:hover{background:#1565a0;transform:translateY(-1px)}
+.btn-secondary{background:#f0ede4;color:#555}
+.btn-secondary:hover{background:#e8e5dc}
+
+/* 批改结果 */
+.result{display:none;margin-top:16px;padding:16px 20px;border-radius:10px;font-size:14px;line-height:1.8}
+.result.show{display:block}
+.result-correct{background:#f0fff4;border:2px solid #a8e6cf;color:#1a7a42}
+.result-wrong{background:#fff8f5;border:2px solid #f5c6aa;color:#a04000}
+.result-icon{font-size:24px;margin-right:6px;vertical-align:-3pt}
+.score-badge{display:inline-block;background:linear-gradient(135deg,#ba7517,#d4940a);color:#fff;padding:4px 14px;border-radius:20px;font-size:15px;font-weight:700;margin-left:8px}
+
+/* 答案解析 */
+.ans-detail{display:none;margin-top:12px;padding:14px 18px;background:#fffbf0;border:1.5px solid #fac775;border-radius:8px;font-size:13.5px;line-height:1.9}
+.ans-detail.show{display:block}
+.ans-detail .alabel{color:#854f0b;font-weight:700}.ans-detail .ans-val{color:#c44;font-weight:600}
+.ans-detail .explain{color:#666;margin-top:6px;padding-left:12px;border-left:3px solid #fac775}
+
+/* 提示文字 */
+.hint{font-size:12px;color:#aaa;margin-top:6px}
+
+/* 底部 */
+.footer{text-align:center;padding:20px;font-size:12px;color:#bbb}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hd">
+<h1>📝 样式测试卷</h1><p>数学 × 1题 + 英语 × 1题 | 支持在线作答 + 自动批改</p>
+</div>
+
+<!-- ==================== 数学 ==================== -->
+<div class="subj">
+<div class="subj-hd">
+<div class="subj-icon math-icon">数</div>
+<div class="subj-title">数学三年级 · 口算速算</div>
+<div class="subjscore">本题 2 分</div>
+</div>
+
+<div class="q"><div class="qn">1</div><div class="qb">
+直接写出得数：<br><br>
+<span style="font-size:20px;letter-spacing:2px">45 + 38 = <input class="bi" id="m1" placeholder="?"></span>
+</div></div>
+
+<div class="submit-bar">
+<button class="btn btn-primary" onclick="gradeMath()">✅ 提交答案</button>
+<button class="btn btn-secondary" onclick="toggleAns('mathAns')">📖 查看答案</button>
+</div>
+
+<div class="result" id="mathResult"></div>
+<div class="ans-detail" id="mathAns">
+<div><span class="alabel">正确答案：</span><span class="ans-val">83</span></div>
+<div class="explain">💡 解题思路：个位 5+8=13，写3进1；十位 4+3+1=8，所以结果是 <strong>83</strong>。</div>
+</div>
+</div><!-- end math -->
+
+<!-- ==================== 英语 ==================== -->
+<div class="subj">
+<div class="subj-hd">
+<div class="subj-icon eng-icon">英</div>
+<div class="subj-title">英语KET · 单词默写</div>
+<div class="subjscore">本题 1 分</div>
+</div>
+
+<div class="q"><div class="qn">1</div><div class="qb">
+根据中文意思写出英文单词：<br><br>
+<table style="width:100%;font-size:15px">
+<tr>
+<td style="width:80px;padding:8px 0;font-weight:600;color:#555">节日 →</td>
+<td style="padding:8px 0"><input class="bi" id="e1" placeholder="输入英文单词" style="min-width:120px"></td>
+</tr>
+</table>
+<p class="hint">提示：以 f 开头，共 8 个字母</p>
+</div></div>
+
+<div class="submit-bar">
+<button class="btn btn-primary" onclick="gradeEng()">✅ 提交答案</button>
+<button class="btn btn-secondary" onclick="toggleAns('engAns')">📖 查看答案</button>
+</div>
+
+<div class="result" id="engResult"></div>
+<div class="ans-detail" id="engAns">
+<div><span class="alabel">正确答案：</span><span class="ans-val">festival</span> <span style="color:#888;font-size:12px">(n.)</span></div>
+<div class="explain">💡 记忆技巧：fest-（节日/庆典）+ -ival（后缀）。例句：<em>The art festival starts on May 5th.</em>（艺术节从5月5日开始。）</div>
+</div>
+</div><!-- end english -->
+
+<div class="footer">📚 小肥猫学习 · 样式测试版 · 告诉我你的体验感受！</div>
+
+</div><!-- end wrap -->
+
+<script>
+// ============ 数学批改 ============
+function gradeMath(){
+    var ans = document.getElementById('m1').value.trim();
+    var resEl = document.getElementById('mathResult');
+    var inputEl = document.getElementById('m1');
+
+    inputEl.className = 'bi';
+
+    if(ans === '83'){
+        resEl.className = 'result result-correct show';
+        resEl.innerHTML = '<span class="result-icon">🎉</span><b>回答正确！</b> 45 + 38 = 83<span class="score-badge">+2分</span>';
+        inputEl.className = 'bi correct';
+    } else if(ans === ''){
+        resEl.className = 'result show';
+        resEl.style.cssText = 'background:#f5f5f5;border-color:#ddd;color:#888';
+        resEl.innerHTML = '<span class="result-icon">✏️</span>请先填写答案再提交哦~';
+    } else {
+        resEl.className = 'result result-wrong show';
+        resEl.innerHTML = '<span class="result-icon">❌</span><b>再想想看~</b> 你填的是 <b>' + ans + '</b>，不对哦。提示：个位 5+8 要进位！<br><button class="btn btn-secondary" style="margin-top:8px;padding:6px 16px;font-size:13px" onclick="toggleAns(\'mathAns\')">查看正确答案</button>';
+        inputEl.className = 'bi wrong';
+    }
+}
+
+// ============ 英语批改 ============
+function gradeEng(){
+    var ans = document.getElementById('e1').value.trim().toLowerCase();
+    var resEl = document.getElementById('engResult');
+    var inputEl = document.getElementById('e1');
+
+    inputEl.className = 'bi';
+
+    if(ans === 'festival'){
+        resEl.className = 'result result-correct show';
+        resEl.innerHTML = '<span class="result-icon">🎉</span><b>完全正确！</b> festival (节日)<span class="score-badge">+1分</span>';
+        inputEl.className = 'bi correct';
+    } else if(ans === ''){
+        resEl.className = 'result show';
+        resEl.style.cssText = 'background:#f5f5f5;border-color:#ddd;color:#888';
+        resEl.innerHTML = '<span class="result-icon">✏️</span>请先填写单词再提交~';
+    } else {
+        // 检查是否接近
+        var hint = '';
+        if(ans === 'festivel' || ans === 'festivle') hint = '拼写很接近了！检查一下字母顺序。';
+        else if(ans.startsWith('fes')) hint = '前缀对了！后面是 t-i-v-a-l。';
+        else if(ans.includes('ival')) hint = '后缀对了！前面是 fest。';
+        else hint = '"节日"的英文是 festival，以 f 开头，共8个字母。';
+
+        resEl.className = 'result result-wrong show';
+        resEl.innerHTML = '<span class="result-icon">❌</span><b>不太对哦~</b> 你填的是 <b>' + ans + '</b><br>' + hint +
+            '<br><button class="btn btn-secondary" style="margin-top:8px;padding:6px 16px;font-size:13px" onclick="toggleAns(\'engAns\')">查看正确答案和记忆法</button>';
+        inputEl.className = 'bi wrong';
+    }
+}
+
+// ============ 切换答案显示 ============
+function toggleAns(id){
+    var el = document.getElementById(id);
+    el.classList.toggle('show');
+}
+
+// 回车快捷键提交
+document.getElementById('m1').addEventListener('keydown', function(e){ if(e.key==='Enter') gradeMath(); });
+document.getElementById('e1').addEventListener('keydown', function(e){ if(e.key==='Enter') gradeEng(); });
+</script>
+</body>
+</html>

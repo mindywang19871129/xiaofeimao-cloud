@@ -1,0 +1,25 @@
+[Unit]
+Description=小肥猫学习 WebSocket 长连接批改服务
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=xiaofeimao
+WorkingDirectory=/opt/xiaofeimao/ws-server
+EnvironmentFile=/opt/xiaofeimao/ws-server/.env
+ExecStart=/opt/xiaofeimao/ws-server/venv/bin/python3 /opt/xiaofeimao/ws-server/main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# 安全加固
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/xiaofeimao
+
+[Install]
+WantedBy=multi-user.target

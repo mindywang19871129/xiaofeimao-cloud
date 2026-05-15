@@ -1,0 +1,454 @@
+{
+  "generated_at": "2026-05-15T09:01:01.603645",
+  "days": {
+    "2026-05-15|周五": {
+      "date": "2026-05-15",
+      "label": "周五",
+      "data": {
+        "date": "2026-05-15",
+        "status": "pending_grading",
+        "total_score": 37,
+        "math": {
+          "subject": "数学",
+          "count": 4,
+          "total_score": 18,
+          "topic": "两三位数除以一位数（竖式）",
+          "questions": [
+            {
+              "id": "M1",
+              "num": 1,
+              "type": "竖式计算",
+              "score": 4,
+              "content": "用竖式计算：84÷4 和 120÷3。注意：商中间或末尾有0的情况。",
+              "correct_answer": "84÷4=21；120÷3=40",
+              "knowledge_point": "两三位数除以一位数（竖式）",
+              "explanation": "84÷4：先用十位的8除以4得2，写在十位；再用个位的4除以4得1，写在个位，所以商是21。120÷3：先用百位的1除以3不够除，看前两位12除以3得4，写在十位；个位的0除以3得0，写在个位，所以商是40。注意0的处理，0除以任何非0数都得0。"
+            },
+            {
+              "id": "M2",
+              "num": 2,
+              "type": "判断改错",
+              "score": 4,
+              "content": "判断下面的竖式计算是否正确，如果不正确，请改正。\n计算：75÷4\n错误的竖式：\n  18\n4)75\n  4\n  --\n  35\n  32\n  --\n   3\n所以 75÷4=18 余 3。\n这个计算对吗？如果不对，请写出正确的竖式和结果。",
+              "correct_answer": "不对。正确竖式：\n  18\n4)75\n  4\n  --\n  35\n  32\n  --\n   3\n所以 75÷4=18 余 3。这个竖式本身正确，但余数3小于除数4，所以结果正确。但题目是判断改错，实际上这个计算正确。",
+              "knowledge_point": "两三位数除以一位数（有余数）",
+              "explanation": "竖式中，18×4=72，72+3=75，余数3小于除数4，所以计算正确。但注意，题目中可能期望学生检查余数是否小于除数。"
+            },
+            {
+              "id": "M3",
+              "num": 3,
+              "type": "填空",
+              "score": 4,
+              "content": "在下面的除法算式中，填上合适的数。\n(1) □÷6=12……3，被除数是（ ）。\n(2) 一个数除以5，商是13，余数最大是（ ），这时被除数是（ ）。",
+              "correct_answer": "(1) 75；(2) 4；69",
+              "knowledge_point": "除法各部分名称，余数必须小于除数",
+              "explanation": "(1) 被除数=商×除数+余数=12×6+3=72+3=75。(2) 余数必须小于除数，除数5，最大余数是4。被除数=13×5+4=65+4=69。"
+            },
+            {
+              "id": "M4",
+              "num": 4,
+              "type": "应用题",
+              "score": 6,
+              "content": "小明的妈妈买了96个苹果，要平均分给小明和他的3个好朋友。每个小朋友能分到几个苹果？还剩几个？",
+              "correct_answer": "96÷4=24个，没有剩余。",
+              "knowledge_point": "两三位数除以一位数（无余数）",
+              "explanation": "小明和3个好朋友一共是4个小朋友。96÷4，先用90÷4=22余2，但更简单：96÷4=24。竖式计算：9÷4得2余1，16÷4得4，所以商是24。没有剩余。"
+            }
+          ]
+        },
+        "english": {
+          "subject": "英语KET",
+          "count": 4,
+          "total_score": 19,
+          "grammar_topic": "现在完成时 have/has done",
+          "new_words": [
+            "yet",
+            "never",
+            "ever",
+            "before",
+            "will",
+            "shall",
+            "tomorrow",
+            "next week",
+            "this evening",
+            "future"
+          ],
+          "questions": [
+            {
+              "id": "E1",
+              "num": 1,
+              "type": "单词默写/翻译",
+              "score": 3,
+              "content": "请写出下列中文对应的英文单词（从今日新词中选3个）。\n(1) 还（尚未）\n(2) 曾经\n(3) 明天",
+              "correct_answer": "yet/ever/tomorrow",
+              "answer_format": "单词之间用斜杠分隔，如：yet/ever/tomorrow",
+              "knowledge_point": "词汇",
+              "explanation": "yet表示'还（尚未）'，常用于现在完成时的否定句或疑问句；ever表示'曾经'，常用于现在完成时的疑问句；tomorrow是'明天'，常用于将来时。",
+              "scoring_criteria": [
+                "每个单词1分，拼写正确得满分",
+                "大小写不扣分"
+              ]
+            },
+            {
+              "id": "E2",
+              "num": 2,
+              "type": "语法填空/选择",
+              "score": 4,
+              "content": "用所给词的现在完成时形式填空。\n(1) I ________ (finish) my homework ________ (yet/just).\n(2) She ________ (never/be) to Beijing.\n(3) ________ you ________ (ever/eat) sushi?\n(4) They ________ (already/see) the film.",
+              "correct_answer": "(1) have finished, just；(2) has never been；(3) Have, ever eaten；(4) have already seen",
+              "answer_format": "用斜杠分隔答案，如：have finished/just/has never been/Have ever eaten/have already seen",
+              "knowledge_point": "现在完成时 have/has done",
+              "explanation": "现在完成时结构：have/has + 过去分词。I用have，she用has。just用于肯定句中表示'刚刚'；never表示'从未'，放在have/has之后；ever用于疑问句，放在主语之后；already用于肯定句中，放在have/has之后。",
+              "scoring_criteria": [
+                "每空1分，共4分",
+                "过去分词形式错误扣0.5分",
+                "语序错误扣0.5分"
+              ]
+            },
+            {
+              "id": "E3",
+              "num": 3,
+              "type": "句子翻译/造句",
+              "score": 5,
+              "content": "用所给单词和现在完成时或将来时翻译下列句子。\n(1) 我从未去过动物园。（never, before）\n(2) 你明天会来吗？（will, tomorrow）\n(3) 我今晚将要准备晚餐。（shall, this evening, prepare）",
+              "correct_answer": "(1) I have never been to the zoo before.\n(2) Will you come tomorrow?\n(3) I shall prepare dinner this evening.",
+              "answer_format": "按顺序写出英文句子，每句一行",
+              "knowledge_point": "现在完成时和将来时",
+              "explanation": "(1) never用于现在完成时，放在have之后；before常用于句末。(2) will表示将来，tomorrow是将来时间词。(3) shall可用于第一人称表示将来，prepare是已学单词。",
+              "scoring_criteria": [
+                "每句2分，共6分，但总分5分，按比例给分",
+                "语法正确得1分（时态和语序）",
+                "词汇使用正确得1分",
+                "拼写错误扣0.5分"
+              ]
+            },
+            {
+              "id": "E4",
+              "num": 4,
+              "type": "短文阅读理解简答",
+              "score": 7,
+              "content": "阅读下面的短文，回答问题。\n\nTom and his family are talking about their future plans. Tom says, \"I have never been to London, but I will go there next week with my dad. We have already prepared our bags.\" His sister Lily says, \"I have ever visited my grandparents before, but I shall go again this evening. I want to share my new book with them.\" Their mother says, \"I have just finished my work. I haven't had dinner yet.\" \n\n问题：\n(1) Has Tom ever been to London? (用yes或no回答)\n(2) When will Tom go to London?\n(3) What has Lily's mother not done yet?",
+              "correct_answer": "(1) No.\n(2) Next week.\n(3) She hasn't had dinner yet.",
+              "answer_format": "按顺序写出答案，用斜杠分隔，如：No/Next week/She hasn't had dinner yet.",
+              "knowledge_point": "阅读理解，现在完成时和将来时",
+              "explanation": "(1) Tom说'I have never been to London'，所以答案是No。(2) Tom说'I will go there next week'，所以是next week。(3) 妈妈最后说'I haven't had dinner yet'，所以还没吃晚餐。",
+              "scoring_criteria": [
+                "每问2分，共6分，但总分7分，按比例给分",
+                "答案完全正确得满分",
+                "拼写错误不扣分，但意思要准确",
+                "第3问可以用完整句子或短语"
+              ]
+            }
+          ]
+        },
+        "_grading_notes": {
+          "parent_answer_format_hint": "家长通常用 |题号|答案| 格式提交答案。数学题答案通常是数字或算式；英语单词默写答案是英文单词（多个用/分隔）；语法填空答案用/分隔；作文是完整英文段落。",
+          "common_variations": [
+            "|M1|83|格式",
+            "M1=83格式",
+            "纯数字顺序格式",
+            "科目前缀格式"
+          ]
+        },
+        "generated_at": "2026-05-15T09:00:21.470958",
+        "day_offset": 2
+      }
+    },
+    "2026-05-16|周六": {
+      "date": "2026-05-16",
+      "label": "周六",
+      "data": {
+        "date": "2026-05-16",
+        "status": "pending_grading",
+        "total_score": 35,
+        "math": {
+          "subject": "数学",
+          "count": 4,
+          "total_score": 18,
+          "topic": "年月日与24时计时法",
+          "questions": [
+            {
+              "id": "M1",
+              "num": 1,
+              "type": "填空",
+              "score": 4,
+              "content": "2026年是平年还是闰年？请写出判断过程，然后回答：这一年的2月有多少天？",
+              "correct_answer": "平年，28天",
+              "knowledge_point": "闰年判断与2月天数",
+              "explanation": "判断闰年：2026÷4=506.5，不能整除，所以是平年。平年2月有28天。"
+            },
+            {
+              "id": "M2",
+              "num": 2,
+              "type": "选择",
+              "score": 4,
+              "content": "下列月份中，哪个月份是大月（有31天）？\nA. 4月  B. 6月  C. 8月  D. 11月",
+              "correct_answer": "C",
+              "knowledge_point": "大月小月",
+              "explanation": "大月口诀：1、3、5、7、8、10、腊（12月），31天永不差。8月是大月，有31天。4月、6月、11月是小月，只有30天。"
+            },
+            {
+              "id": "M3",
+              "num": 3,
+              "type": "计算",
+              "score": 4,
+              "content": "小明下午3时30分从家出发去图书馆，下午4时15分到达。他路上用了多长时间？请用24时计时法表示出发和到达时间，再计算经过时间。",
+              "correct_answer": "出发时间：15:30，到达时间：16:15，经过时间：45分钟",
+              "knowledge_point": "24时计时法与经过时间计算",
+              "explanation": "下午3时30分=15:30，下午4时15分=16:15。经过时间=16:15-15:30=45分钟。注意：分钟不够减时，向小时借1小时（60分钟），15:30变成15:90，16:15-15:90=45分钟。"
+            },
+            {
+              "id": "M4",
+              "num": 4,
+              "type": "应用题",
+              "score": 6,
+              "content": "学校组织春游，从5月16日（今天）开始，到5月20日结束。\n（1）这次春游一共持续几天？\n（2）如果春游每天上午8时30分开始活动，下午4时结束，每天活动多长时间？\n（3）小明在春游中带了50元零花钱，他买了2瓶水（每瓶3元）和1盒饼干（15元），还剩多少钱？",
+              "correct_answer": "（1）5天 （2）7小时30分钟 （3）29元",
+              "knowledge_point": "日期推算、经过时间计算、加减法应用",
+              "explanation": "（1）16日到20日，包括16日和20日，共5天。\n（2）上午8:30到下午4:00，下午4:00=16:00，经过时间=16:00-8:30=7小时30分钟。\n（3）2瓶水：2×3=6元，加饼干15元，共6+15=21元，剩余50-21=29元。"
+            }
+          ]
+        },
+        "english": {
+          "subject": "英语KET",
+          "count": 4,
+          "total_score": 17,
+          "grammar_topic": "现在完成时 have/has done",
+          "new_words": [
+            "soon",
+            "later",
+            "promise",
+            "hope",
+            "tonight",
+            "day after tomorrow",
+            "next month",
+            "next year",
+            "can",
+            "could"
+          ],
+          "questions": [
+            {
+              "id": "E1",
+              "num": 1,
+              "type": "单词默写",
+              "score": 3,
+              "content": "请根据中文写出对应的英文单词（每个1分）：\n1. 不久 ______\n2. 承诺 ______\n3. 希望 ______",
+              "correct_answer": "soon/promise/hope",
+              "answer_format": "用/分隔，例如：soon/promise/hope",
+              "knowledge_point": "新词汇记忆",
+              "explanation": "soon是'不久'，promise是'承诺'，hope是'希望'。注意拼写。",
+              "scoring_criteria": [
+                "每个单词拼写正确得1分，大小写不扣分"
+              ]
+            },
+            {
+              "id": "E2",
+              "num": 2,
+              "type": "语法填空",
+              "score": 4,
+              "content": "用have或has填空（每空1分）：\n1. I ______ already finished my homework.\n2. She ______ never been to Beijing.\n3. They ______ just arrived at the station.\n4. He ______ not seen that movie yet.",
+              "correct_answer": "have/has/have/has",
+              "answer_format": "用/分隔，例如：have/has/have/has",
+              "knowledge_point": "现在完成时 have/has 的用法",
+              "explanation": "I/You/We/They用have，He/She/It用has。第1题主语I用have，第2题She用has，第3题They用have，第4题He用has。",
+              "scoring_criteria": [
+                "每空1分，正确得1分"
+              ]
+            },
+            {
+              "id": "E3",
+              "num": 3,
+              "type": "句子翻译",
+              "score": 4,
+              "content": "请将下列句子翻译成英文（每句2分）：\n1. 我希望明天能见到你。（使用hope和can）\n2. 我承诺今晚会完成作业。（使用promise和tonight）",
+              "correct_answer": "1. I hope I can see you tomorrow. 2. I promise I will finish my homework tonight.",
+              "answer_format": "按顺序写出英文句子",
+              "knowledge_point": "新词造句与现在完成时（本句用一般将来时，但重点是新词）",
+              "explanation": "第1句：hope表示希望，can表示能。第2句：promise表示承诺，tonight表示今晚。注意句子结构。",
+              "scoring_criteria": [
+                "每个句子使用指定词汇得1分",
+                "语法正确得1分"
+              ]
+            },
+            {
+              "id": "E4",
+              "num": 4,
+              "type": "KET小作文",
+              "score": 6,
+              "content": "写一篇55-65词的短文，介绍你下个月的周末计划。\n必须使用以下词汇：next month, hope, can, soon, grandparents\n提示：你可以写去看望祖父母、去公园玩等。",
+              "correct_answer": "Next month, I hope I can visit my grandparents. They live far away, but I will see them soon. I will share my toys with my little cousin. I also hope to go to the park. I can play football there. I am very happy!",
+              "answer_format": "写一段完整的英文短文，55-65词",
+              "knowledge_point": "写作综合运用（新词+语法）",
+              "explanation": "作文要包含所有指定词汇，注意使用一般将来时或现在完成时。内容要连贯，有逻辑。",
+              "scoring_criteria": [
+                "包含所有5个指定词汇得2分（每个0.4分）",
+                "词数55-65得1分",
+                "语法基本正确（时态、主谓一致）得2分",
+                "内容连贯、有逻辑得1分"
+              ]
+            }
+          ]
+        },
+        "_grading_notes": {
+          "parent_answer_format_hint": "家长通常用 |题号|答案| 格式提交答案。数学题答案通常是数字或算式；英语单词默写答案是英文单词（多个用/分隔）；语法填空答案用/分隔；作文是完整英文段落。",
+          "common_variations": [
+            "|M1|平年，28天|格式",
+            "M1=平年，28天格式",
+            "纯数字顺序格式",
+            "科目前缀格式"
+          ]
+        },
+        "generated_at": "2026-05-15T09:00:37.689261",
+        "day_offset": 3
+      }
+    },
+    "2026-05-17|周日": {
+      "date": "2026-05-17",
+      "label": "周日",
+      "data": {
+        "date": "2026-05-17",
+        "status": "pending_grading",
+        "total_score": 36,
+        "math": {
+          "subject": "数学",
+          "count": 4,
+          "total_score": 18,
+          "topic": "面积概念与面积单位换算",
+          "questions": [
+            {
+              "id": "M1",
+              "num": 1,
+              "type": "填空题",
+              "score": 4,
+              "content": "填一填。\n(1) 3平方分米 = (    )平方厘米\n(2) 500平方厘米 = (    )平方分米\n(3) 1平方米 = (    )平方分米 = (    )平方厘米",
+              "correct_answer": "(1) 300  (2) 5  (3) 100; 10000",
+              "knowledge_point": "面积单位换算（进率100）",
+              "explanation": "相邻面积单位之间的进率是100。大单位换小单位要乘100，小单位换大单位要除以100。\n(1) 3 dm² = 3 × 100 = 300 cm²\n(2) 500 cm² = 500 ÷ 100 = 5 dm²\n(3) 1 m² = 100 dm² = 100 × 100 = 10000 cm²"
+            },
+            {
+              "id": "M2",
+              "num": 2,
+              "type": "选择题",
+              "score": 4,
+              "content": "下面哪个说法是正确的？请把序号填在括号里。\n① 一个信封的面积大约是200平方分米。\n② 小明的身高是150平方厘米。\n③ 1米 = 100厘米，所以1平方米 = 100平方厘米。\n④ 一本数学书封面的面积大约是5平方分米。",
+              "correct_answer": "④",
+              "knowledge_point": "面积单位的实际感知与面积和长度的区分",
+              "explanation": "① 200平方分米=2平方米，比课桌还大，信封不可能那么大，错。\n② 身高是长度，应该用厘米，不是平方厘米，错。\n③ 1米=100厘米，但面积是边长乘边长，1平方米=100×100=10000平方厘米，不是100，错。\n④ 数学书封面长大约25厘米，宽大约20厘米，面积约500平方厘米=5平方分米，正确。"
+            },
+            {
+              "id": "M3",
+              "num": 3,
+              "type": "应用题",
+              "score": 6,
+              "content": "小丽家的客厅地面是一个长方形，长5米，宽4米。\n(1) 客厅地面的面积是多少平方米？\n(2) 如果选用边长2分米的正方形地砖铺地面，需要多少块地砖？\n（提示：先统一单位）",
+              "correct_answer": "(1) 20平方米  (2) 500块",
+              "knowledge_point": "面积计算与单位换算应用",
+              "explanation": "(1) 长方形面积 = 长 × 宽 = 5 × 4 = 20（平方米）\n(2) 方法一：先统一单位。5米=50分米，4米=40分米。客厅面积 = 50×40 = 2000（平方分米）。一块地砖面积 = 2×2 = 4（平方分米）。需要地砖 = 2000 ÷ 4 = 500（块）。\n方法二：先算平方米，再换算。20平方米 = 2000平方分米，2000÷4=500块。"
+            },
+            {
+              "id": "M4",
+              "num": 4,
+              "type": "画图题",
+              "score": 4,
+              "content": "下面是一个边长为4厘米的正方形。\n(1) 请计算它的周长和面积。\n(2) 在方格纸中（每个小方格边长1厘米），画出一个与这个正方形面积相同，但形状不同的图形。\n\n（方格纸示意图，每个□代表1平方厘米）\n□ □ □ □\n□ □ □ □\n□ □ □ □\n□ □ □ □",
+              "correct_answer": "(1) 周长=16厘米，面积=16平方厘米\n(2) 答案不唯一，例如长8厘米、宽2厘米的长方形（面积=8×2=16平方厘米）",
+              "knowledge_point": "区分面积与周长；面积守恒",
+              "explanation": "(1) 正方形周长=边长×4=4×4=16（厘米）；正方形面积=边长×边长=4×4=16（平方厘米）。注意：周长是长度，用厘米；面积是大小，用平方厘米。\n(2) 面积相同但形状不同，可以画长8厘米、宽2厘米的长方形，因为8×2=16平方厘米。也可以画其他图形，只要面积是16平方厘米。"
+            }
+          ]
+        },
+        "english": {
+          "subject": "英语KET",
+          "count": 4,
+          "total_score": 18,
+          "grammar_topic": "现在完成时 have/has done",
+          "new_words": [
+            "should",
+            "must",
+            "may",
+            "might",
+            "needn't",
+            "ability",
+            "permission",
+            "advice",
+            "rule",
+            "possible"
+          ],
+          "questions": [
+            {
+              "id": "E1",
+              "num": 1,
+              "type": "单词默写/翻译",
+              "score": 4,
+              "content": "请写出下列中文对应的英文单词（每个1分）。\n(1) 应该 ________\n(2) 必须 ________\n(3) 允许 ________\n(4) 规则 ________",
+              "correct_answer": "(1) should  (2) must  (3) permission  (4) rule",
+              "answer_format": "依次写出单词，用逗号或空格隔开。例如：should, must, permission, rule",
+              "knowledge_point": "新单词拼写",
+              "explanation": "这些是今天新学的情态动词和名词。should表示'应该'，must表示'必须'，permission是'允许'的名词形式，rule是'规则'。",
+              "scoring_criteria": [
+                "每个单词1分，拼写完全正确得分",
+                "大小写不扣分"
+              ]
+            },
+            {
+              "id": "E2",
+              "num": 2,
+              "type": "语法填空",
+              "score": 4,
+              "content": "用括号内动词的现在完成时形式填空。\n(1) I ________ (finish) my homework already. 我可以去踢球了。\n(2) She ________ (not eat) lunch yet. 她还不饿。\n(3) ________ you ever ________ (be) to Beijing? 没有，但我很想去。\n(4) My grandparents ________ (live) in this city for 20 years.",
+              "correct_answer": "(1) have finished  (2) has not eaten / hasn't eaten  (3) Have; been  (4) have lived",
+              "answer_format": "依次写出答案，如：have finished, hasn't eaten, Have been, have lived",
+              "knowledge_point": "现在完成时 have/has done",
+              "explanation": "现在完成时结构：have/has + 过去分词。\n(1) I是主语，用have，finish的过去分词是finished。already表示'已经'。\n(2) She是第三人称单数，用has，否定加not。eat的过去分词是eaten。yet用于否定句。\n(3) 疑问句把have提前，ever表示'曾经'，be的过去分词是been。\n(4) grandparents是复数，用have，live的过去分词是lived。for+时间段表示持续。",
+              "scoring_criteria": [
+                "每个空1分，时态和主谓一致正确得分",
+                "缩写形式（如hasn't）也算对"
+              ]
+            },
+            {
+              "id": "E3",
+              "num": 3,
+              "type": "句子翻译/造句",
+              "score": 5,
+              "content": "请用所给单词和现在完成时造句（每个句子1分，单词使用正确0.5分，语法正确0.5分）。\n(1) should / advice — 你应该听听父母的建议。\n(2) may / permission — 我可能已经得到了老师的允许。\n(3) might / possible — 他可能已经完成了作业，这是可能的。\n(4) must / rule — 我们必须遵守规则。\n(5) needn't / worry — 你不必担心，我已经准备好了一切。",
+              "correct_answer": "(1) You should listen to your parents' advice.  (2) I may have got the teacher's permission.  (3) He might have finished his homework. It is possible.  (4) We must follow the rules.  (5) You needn't worry. I have prepared everything.",
+              "answer_format": "写出完整的英文句子，每句一行。",
+              "knowledge_point": "现在完成时与新词综合运用",
+              "explanation": "注意情态动词后接动词原形，但表示对过去的推测时用'may/might have done'结构。现在完成时表示已经完成的动作。\n(1) should + 动词原形\n(2) may + have + 过去分词，表示'可能已经'\n(3) might + have + 过去分词，possible作表语\n(4) must + 动词原形\n(5) needn't + 动词原形，现在完成时在从句中",
+              "scoring_criteria": [
+                "每个句子1分：单词使用正确0.5分，语法（时态、情态动词用法）正确0.5分",
+                "拼写错误每个扣0.25分，最多扣0.5分"
+              ]
+            },
+            {
+              "id": "E4",
+              "num": 4,
+              "type": "阅读理解简答",
+              "score": 5,
+              "content": "读下面的短文，回答后面的问题。\n\nTom is a student. He has just finished his homework. Now he wants to play outside. But his mom says, \"You must clean your room first. It is a rule in our family.\" Tom thinks it is good advice. He has already cleaned his room. Now he has permission to go out. He might play football with his friends. He has never played football before, but he has the ability to learn. It is possible that he will enjoy it.\n\n问题：\n(1) What has Tom just finished? (1分)\n(2) Why must Tom clean his room? (1分)\n(3) Has Tom ever played football before? (1分)\n(4) 从短文中找出一个现在完成时的句子，并抄写下来。(2分)",
+              "correct_answer": "(1) He has just finished his homework.  (2) Because it is a rule in his family.  (3) No, he hasn't. / No, he has never played football before.  (4) 答案不唯一，例如：He has just finished his homework. / He has already cleaned his room. / He has never played football before.",
+              "answer_format": "用完整句子回答，或者按照题目要求。第(4)题直接抄写句子。",
+              "knowledge_point": "阅读理解；现在完成时在语境中的运用",
+              "explanation": "短文包含了今天学的所有新词（should, must, may, might, needn't, ability, permission, advice, rule, possible）和现在完成时。\n(1) 第一句直接给出答案。\n(2) 妈妈的话里明确说了'It is a rule'。\n(3) 文中说'He has never played football before'，所以是否定的。\n(4) 只要含有have/has+过去分词结构的句子都正确。",
+              "scoring_criteria": [
+                "(1)(2)(3)每题1分，答案正确完整得分",
+                "(4)题2分：抄写正确得1分，句子是现在完成时得1分"
+              ]
+            }
+          ]
+        },
+        "_grading_notes": {
+          "parent_answer_format_hint": "家长通常用 |题号|答案| 格式提交答案。数学题答案通常是数字或算式；英语单词默写答案是英文单词（多个用/分隔）；语法填空答案用/分隔；作文是完整英文段落。",
+          "common_variations": [
+            "|M1|300,5,100,10000|格式",
+            "M1=300/5/100/10000格式",
+            "纯数字顺序格式",
+            "科目前缀格式"
+          ]
+        },
+        "generated_at": "2026-05-15T09:01:01.602889",
+        "day_offset": 4
+      }
+    }
+  }
+}

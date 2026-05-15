@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小肥猫学习 · Mac开关机功能对比表</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f6fa;
+    color: #2d3436;
+    padding: 30px 20px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 26px;
+    color: #2d3436;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #636e72;
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+  .section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .section h2 {
+    font-size: 20px;
+    color: #2d3436;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section h2 .icon { font-size: 24px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: #6c5ce7;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  tbody tr:hover { background: #f8f7ff; }
+  tbody tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+  tbody tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-available { background: #d4fceb; color: #00b894; }
+  .badge-unavailable { background: #ffe6e6; color: #e17055; }
+  .badge-partial { background: #fff3cd; color: #b8860b; }
+  .badge-feishu { background: #e8f0fe; color: #3370ff; }
+  .badge-local { background: #f0e6ff; color: #6c5ce7; }
+
+  .divider {
+    margin: 30px 0;
+    border: none;
+    border-top: 1px dashed #dfe6e9;
+  }
+
+  .summary-box {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+  .summary-box h3 { font-size: 18px; margin-bottom: 12px; }
+  .summary-box ul { list-style: none; padding: 0; }
+  .summary-box li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+  .summary-box li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+  }
+
+  .note {
+    background: #fff8e1;
+    border-left: 4px solid #fdcb6e;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #6d5e00;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🐱 小肥猫学习 · Mac 开关机功能对比表</h1>
+<p class="subtitle">更新日期：2026-05-14 | 推送时间：每天 09:00（周五推三天套餐）</p>
+
+<!-- 表1：Mac开机 vs 关机 -->
+<div class="section">
+  <h2><span class="icon">🖥️</span> 表一：Mac 开机 vs Mac 关机 — 功能可用性对比</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>功能模块</th>
+        <th>具体功能</th>
+        <th>Mac 开机 🟢</th>
+        <th>Mac 关机 🔴</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3"><strong>每日出题</strong></td>
+        <td>09:00 自动生成当日题目</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>依赖 launchd + daily_task.py + DeepSeek API</td>
+      </tr>
+      <tr>
+        <td>周五三天套餐（五+六+日）</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>需在 09:00 前开机</td>
+      </tr>
+      <tr>
+        <td>手动触发出题（"出今天的题"）</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>bot_server.py 需在运行</td>
+      </tr>
+
+      <tr>
+        <td rowspan="3"><strong>作业批改</strong></td>
+        <td>收到答案 → AI自动批改</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>bot_server.py + DeepSeek API</td>
+      </tr>
+      <tr>
+        <td>逐题解析 + 知识点讲解</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>依赖 AI 模型推理</td>
+      </tr>
+      <tr>
+        <td>错题变式题自动生成</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>DeepSeek API 实时生成</td>
+      </tr>
+
+      <tr>
+        <td rowspan="3"><strong>错题本</strong></td>
+        <td>自动录入错题</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>写入 mistake_book.json</td>
+      </tr>
+      <tr>
+        <td>按艾宾浩斯间隔重复复习</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>出题时自动混入旧错题</td>
+      </tr>
+      <tr>
+        <td>手动录入错题</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>飞书消息触发 + bot_server</td>
+      </tr>
+
+      <tr>
+        <td><strong>推送通知</strong></td>
+        <td>飞书卡片消息推送</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>feishu_push.py + 飞书开放API</td>
+      </tr>
+
+      <tr>
+        <td rowspan="2"><strong>维护任务</strong></td>
+        <td>日志轮转 + 文件归档</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>auto_compress.py（每周日12:00）</td>
+      </tr>
+      <tr>
+        <td>长期记忆提炼</td>
+        <td><span class="badge badge-available">✅ 可用</span></td>
+        <td><span class="badge badge-unavailable">❌ 不可用</span></td>
+        <td>30天以上日志 → MEMORY.md</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 表2：飞书原厂 vs 本地程序 -->
+<div class="section">
+  <h2><span class="icon">🏗️</span> 表二：飞书原厂能力 vs 小肥猫本地程序 — 职责划分</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>层级</th>
+        <th>功能</th>
+        <th style="width: 100px;">归属方</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="4"><strong>飞书平台<br>（原厂能力）</strong></td>
+        <td>消息收发（私聊/群聊）</td>
+        <td><span class="badge badge-feishu">飞书 🐦</span></td>
+        <td>核心管道，消息 24/7 可用，与 Mac 开关机无关</td>
+      </tr>
+      <tr>
+        <td>交互式卡片消息渲染</td>
+        <td><span class="badge badge-feishu">飞书 🐦</span></td>
+        <td>手机/平板/电脑通用 UI 组件</td>
+      </tr>
+      <tr>
+        <td>消息排队与回调</td>
+        <td><span class="badge badge-feishu">飞书 🐦</span></td>
+        <td>Mac关机时消息暂存，开机后 bot_server 才能处理</td>
+      </tr>
+      <tr>
+        <td>用户身份认证（open_id）</td>
+        <td><span class="badge badge-feishu">飞书 🐦</span></td>
+        <td>飞书开放平台管理，本地程序使用</td>
+      </tr>
+
+      <tr style="background: #fafafa;"><td colspan="4" style="text-align: center; color: #999; font-size: 12px; padding: 6px;">—— 以下为小肥猫本地程序能力（需 Mac 开机运行）——</td></tr>
+
+      <tr>
+        <td rowspan="5"><strong>小肥猫<br>本地程序</strong></td>
+        <td>AI 智能出题（DeepSeek API）</td>
+        <td><span class="badge badge-local">💻 本地</span></td>
+        <td>question_generator.py 按教学大纲 + 错题复习</td>
+      </tr>
+      <tr>
+        <td>AI 自动批改 + 解析</td>
+        <td><span class="badge badge-local">💻 本地</span></td>
+        <td>bot_server.py 接收消息 → DeepSeek → 返回结果</td>
+      </tr>
+      <tr>
+        <td>错题本管理（录入/复习/消除）</td>
+        <td><span class="badge badge-local">💻 本地</span></td>
+        <td>mistake_book.json + 艾宾浩斯间隔算法</td>
+      </tr>
+      <tr>
+        <td>定时任务调度（launchd）</td>
+        <td><span class="badge badge-local">💻 本地</span></td>
+        <td>09:00出题、周日12:00压缩、开机自启bot_server</td>
+      </tr>
+      <tr>
+        <td>文件维护（日志/归档/记忆）</td>
+        <td><span class="badge badge-local">💻 本地</span></td>
+        <td>auto_compress.py 四大压缩能力</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 结论 -->
+<div class="summary-box">
+  <h3>📋 关键结论</h3>
+  <ul>
+    <li><strong>飞书只管"管道"：</strong>收发消息、渲染卡片、排队待处理。飞书不做任何 AI 出题/批改/错题本处理。</li>
+    <li><strong>所有智能能力依赖 Mac 开机：</strong>出题、批改、错题本、定时推送全部由本地 Python 程序 + DeepSeek API 完成。</li>
+    <li><strong>Mac 关机 = 全部功能暂停：</strong>飞书消息会排队，但无人处理。开机后 bot_server 才能消费积压消息。</li>
+    <li><strong>周五关键窗口：</strong>周五 09:00 前必须开机，才能收到三天周末套餐。错过则需手动触发。</li>
+    <li><strong>如需 7×24 可用：</strong>考虑迁移到云服务器（已有 deploy.sh 脚本，支持一键部署到 Linux 云主机）。</li>
+  </ul>
+</div>
+
+<div class="note">
+  <strong>💡 提示：</strong>如果你想让孩子即使在 Mac 关机时也能获得 AI 批改反馈，有两个方案：<br>
+  ① <strong>云部署</strong>（执行 <code>./deploy.sh install</code> 到云服务器）—— 彻底解决依赖 Mac 开机的问题；<br>
+  ② <strong>保持 Mac 全天开机</strong>（当前方案）—— 简单但不稳定，适合大部分时间 Mac 在线的场景。
+</div>
+
+</div>
+</body>
+</html>
