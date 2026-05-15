@@ -45,6 +45,43 @@ fs_client = create_client(APP_ID, APP_SECRET)
 
 # ==================== 事件处理 ====================
 
+def _extract_message_text(message) -> str:
+    """
+    从飞书消息中提取纯文本内容
+    支持 message_type: text / post
+    """
+    msg_content = json.loads(message.content)
+
+    if message.message_type == "text":
+        return msg_content.get("text", "").strip()
+
+    if message.message_type == "post":
+        # post 消息结构: content 是 JSON 字符串，含 title 和 content 数组
+        # content 是 [[{tag, text}, ...], ...] 的多段落结构
+        try:
+            post_content = json.loads(message.content) if isinstance(message.content, str) else message.content
+            parts = []
+            # 提取标题
+            title = post_content.get("title", "")
+            if title:
+                parts.append(title)
+            # 提取各段落文本
+            for paragraph in post_content.get("content", []):
+                for elem in paragraph:
+                    if elem.get("tag") == "text":
+                        parts.append(elem.get("text", ""))
+                    elif elem.get("tag") == "at":
+                        # @人的文本
+                        parts.append(elem.get("user_name", ""))
+            return " ".join(parts).strip()
+        except (json.JSONDecodeError, TypeError, KeyError):
+            # 降级: 把整个 content 当字符串
+            return str(message.content).strip()
+
+    # 其他类型
+    return ""
+
+
 def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
     """
     处理飞书消息事件（WebSocket 推送）
@@ -54,14 +91,11 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
         event = data.event
         message = event.message
 
-        # 只处理文本消息
-        if message.message_type != "text":
+        # 提取消息文字内容（支持 text 和 post 两种类型）
+        text = _extract_message_text(message)
+        if not text:
             logger.info(f"忽略非文本消息: {message.message_type}")
             return
-
-        # 解析消息内容
-        msg_content = json.loads(message.content)
-        text = msg_content.get("text", "").strip()
 
         if not text:
             return
@@ -73,11 +107,18 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
         msg_timestamp = int(message.create_time) if message.create_time else 0
         msg_date = datetime.fromtimestamp(msg_timestamp / 1000).strftime("%Y-%m-%d")
 
-        logger.info(f"[消息] sender={sender_id}, text={text[:100]}")
+        logger.info(f"[消息] sender={sender_id[:12]}... type={message.message_type} text={text[:80]}")
 
-        # 跳过指令
+        # 指令处理：友好回复而非静默跳过
         if is_command(text):
-            logger.info(f"[跳过] 识别为指令: {text[:50]}")
+            logger.info(f"[指令] 识别为指令: {text[:50]}")
+            send_feishu_text(
+                fs_client, sender_id,
+                f"🐱 收到指令「{text[:30]}」\n\n"
+                f"当前长连接批改服务仅支持**答案提交批改**功能。\n"
+                f"如需出题、错题本等功能，请使用 Mac 本地的 bot_server。\n\n"
+                f"💡 发送答案（如 83 44 63,22 forget arrive plan）即可批改。"
+            )
             return
 
         # 执行批改
@@ -93,6 +134,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
             )
         else:
             send_feishu_text(fs_client, sender_id, result.get("summary", "批改未成功，请稍后重试"))
+            logger.info(f"[批改失败] {result.get('summary','')[:80]}")
 
     except Exception as e:
         logger.error(f"[异常] 事件处理失败: {e}", exc_info=True)
