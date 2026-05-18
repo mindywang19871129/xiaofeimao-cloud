@@ -30,9 +30,35 @@ DAILY_QUESTIONS_FILE = WORK_DIR / "daily_questions.json"
 WEEKEND_BUNDLE_FILE = WORK_DIR / "weekend_bundle.json"
 LOG_DIR = WORK_DIR / ".logs"
 LOG_FILE = LOG_DIR / "daily_task.log"
+PUSH_LOG_FILE = LOG_DIR / "push_log.json"  # 防重复推送：记录已推送的日期
 
 # ==================== 日志初始化 ====================
 LOG_DIR.mkdir(exist_ok=True)
+
+# ==================== 防重复推送 ====================
+
+def load_push_log():
+    """加载已推送日期记录"""
+    if PUSH_LOG_FILE.exists():
+        try:
+            return json.loads(PUSH_LOG_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+def save_push_log(log):
+    PUSH_LOG_FILE.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def has_been_pushed(date_str):
+    """检查某日期是否已推送过"""
+    log = load_push_log()
+    return date_str in log
+
+def mark_pushed(date_str, mode="daily"):
+    """标记某日期已推送"""
+    log = load_push_log()
+    log[date_str] = {"pushed_at": datetime.now().isoformat(), "mode": mode}
+    save_push_log(log)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -459,18 +485,31 @@ def run(dry_run=False, force=False):
         logger.info("\n📋 [2/4] 构建推送消息...")
         title, content = build_push_content(data)
 
-    # Step 3: 推送到飞书（周五和普通模式共用）
-    logger.info("\n📤 [3/4] 推送到飞书...")
-    push_success = step_push(title, content, dry_run=dry_run)
-
-    # Step 4: 同步题目到飞书多维表格（云函数批改需要）
-    if friday_mode:
-        logger.info("\n📊 [4/4] 同步三天套餐到飞书多维表格...")
-        pushed_days, total_records = step_push_weekend_to_bitable(bundle)
-        bitable_success = pushed_days > 0
+    # ===== 防重复推送：检查今日是否已推送过 =====
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    if has_been_pushed(today_str) and not dry_run:
+        logger.info(f"⏭️ 今天({today_str})已推送过，跳过推送和同步")
+        push_success = True
+        bitable_success = True
+        pushed_days = 0
+        total_records = 0
     else:
-        logger.info("\n📊 [4/4] 同步题目到飞书多维表格...")
-        bitable_success = step_push_to_bitable(data)
+        # Step 3: 推送到飞书（周五和普通模式共用）
+        logger.info("\n📤 [3/4] 推送到飞书...")
+        push_success = step_push(title, content, dry_run=dry_run)
+
+        # Step 4: 同步题目到飞书多维表格（云函数批改需要）
+        if friday_mode:
+            logger.info("\n📊 [4/4] 同步三天套餐到飞书多维表格...")
+            pushed_days, total_records = step_push_weekend_to_bitable(bundle)
+            bitable_success = pushed_days > 0
+        else:
+            logger.info("\n📊 [4/4] 同步题目到飞书多维表格...")
+            bitable_success = step_push_to_bitable(data)
+
+        # 推送成功后标记
+        if push_success and not dry_run:
+            mark_pushed(today_str, mode="weekend" if friday_mode else "daily")
 
     elapsed = (datetime.now() - start_time).total_seconds()
     status = "✅ 成功" if push_success else ("⏭️ Dry-run" if dry_run else "❌ 失败")
