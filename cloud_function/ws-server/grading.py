@@ -412,13 +412,12 @@ def deep_grade_with_ai(question: dict, student_answer: str, rules: list) -> dict
     # 根据科目和题型生成针对性的考试评分标准
     scoring_standard = _ket_scoring_standard(q_type) if "英语" in q_subject else _math_scoring_standard(q_type)
 
-    prompt = f"""你是一个三年级小学数学和英语KET批改专家。请严格按照以下考试标准批改。
+    prompt = f"""你是一个三年级小学数学和英语KET批改专家。请严格按照以下考试标准，**独立判断**孩子答案是否正确。
 
 === 题目信息 ===
 题号: {question.get('id', '')}
 题型: {question.get('type', '')}
 题目内容: {question.get('content', '')}
-标准答案: {question.get('correct_answer', '')}
 知识点: {question.get('knowledge_point', '')}
 
 === 孩子答案 ===
@@ -431,17 +430,19 @@ def deep_grade_with_ai(question: dict, student_answer: str, rules: list) -> dict
 {scoring_standard}
 
 === 批改输出要求 ===
-1. 先判断对错，再按上述标准给分（1.0 / 0.5 / 0.0）
-2. 解析要具体到错误点：不是笼统说"不对"，而是说"你把went写成了goed，go的过去式是不规则变化，正确形式是went"
-3. 英语语法错题必须给出正确案例示范（一个完整的正确句子）
-4. 数学错题必须展示正确的完整计算步骤
-5. 用三年级孩子能理解的语言，但专业度不降低
+1. **你必须自己计算出/推演出正确答案**，不要依赖任何外部提供的"标准答案"。如果题目本身有明确答案（如数学计算、英语语法填空），你完全可以独立判断。
+2. 先判断对错，再按上述标准给分（1.0 / 0.5 / 0.0）
+3. 解析要具体到错误点：不是笼统说"不对"，而是说"你把went写成了goed，go的过去式是不规则变化，正确形式是went"
+4. 英语语法错题必须给出正确案例示范（一个完整的正确句子）
+5. 数学错题必须展示正确的完整计算步骤
+6. 用三年级孩子能理解的语言，但专业度不降低
+7. 对于开放性题目（翻译、阅读简答），判断答案是否合理达意，不要求逐字匹配
 
 严格按JSON格式输出（不要markdown代码块）：
 {{
   "correct": true/false,
   "score_ratio": 1.0/0.5/0.0,
-  "analysis": "详细解析：(1)孩子的答案是什么 (2)正确答案是什么 (3)为什么对/错 (4)涉及的知识点（80-150字）",
+  "analysis": "详细解析：(1)孩子的答案是什么 (2)正确答案应该是什么 (3)为什么对/错 (4)涉及的知识点（80-150字）",
   "error_reason": "具体错因：指出哪个词/哪个步骤错了，正确的应该是什么（50-100字）",
   "improvement": "改进建议：给一个记忆口诀或小技巧，三年级能懂（40-80字）",
   "child_thinking": "推测孩子可能的思考过程（20-40字）",
