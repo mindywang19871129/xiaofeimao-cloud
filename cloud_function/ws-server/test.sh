@@ -23,6 +23,11 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$SCRIPT_DIR"
 export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH}"
 
+# 加载 .env 环境变量（test.sh 直接执行时 systemd 不会注入）
+if [ -f ".env" ]; then
+    set -a; source .env; set +a
+fi
+
 echo "========================================="
 echo "🐱 小肥猫 v2.2 自动化测试"
 echo "========================================="
