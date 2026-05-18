@@ -381,5 +381,7 @@ def is_command(text: str) -> bool:
         "生成今日练习", "出今天的题", "暂停推送", "停止推送",
         "恢复推送", "开始推送", "录错题", "加入错题本",
         "记录错题", "手动录错",
+        # ===== 标准答案确认（非学生提交）=====
+        "标准答案", "答案确认",
     ]
     return any(cmd in text_lower for cmd in commands)

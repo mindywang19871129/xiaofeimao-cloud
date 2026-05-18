@@ -242,6 +242,9 @@ def process_message(user_text: str) -> str:
         "加入错题本": "ADD_MISTAKE",
         "记录错题": "ADD_MISTAKE",
         "手动录错": "ADD_MISTAKE",
+        # ===== 新增：标准答案确认（非学生提交）=====
+        "标准答案": "CONFIRM_ANSWERS",
+        "答案确认": "CONFIRM_ANSWERS",
     }
 
     for keyword, cmd_type in special_commands.items():
@@ -308,6 +311,15 @@ def handle_special_command(cmd_type: str, original_msg: str) -> str:
     elif cmd_type == "ADD_MISTAKE":
         # ===== 新增：自由录入错题本功能 =====
         return handle_add_mistake(original_msg)
+
+    elif cmd_type == "CONFIRM_ANSWERS":
+        # ===== 新增：标准答案确认 =====
+        return (
+            "✅ **收到标准答案确认！**\n\n"
+            "我已记录今日题目的标准答案，等待孩子作答后提交批改。\n\n"
+            "💡 让孩子做完后直接在飞书回复答案即可，我来批改！\n"
+            "📝 答案格式示例：`M1=83 M2=44 E1=forget/arrive/plan`"
+        )
 
     return "收到指令，正在处理..."
 
