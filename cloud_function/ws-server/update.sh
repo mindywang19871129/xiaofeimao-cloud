@@ -13,9 +13,10 @@ WS_DIR="${REPO_ROOT}/cloud_function/ws-server"
 echo "🛑 停止服务..."
 systemctl stop xiaofeimao
 
-echo "📥 拉取最新代码..."
+echo "📥 同步远端代码..."
 cd "${REPO_ROOT}"
-git pull origin main
+git fetch origin main
+git reset --hard origin/main
 
 echo "📦 更新依赖..."
 cd "${WS_DIR}"
