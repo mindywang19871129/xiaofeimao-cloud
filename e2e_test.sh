@@ -204,8 +204,8 @@ import os, sys
 sys.path.insert(0, '.')
 # 仅做导入测试，不实际写数据
 try:
-    from feishu_bitable import get_tenant_access_token
-    token = get_tenant_access_token()
+    from feishu_bitable import get_token
+    token = get_token()
     if token and len(token) > 10:
         print('OK: tenant_access_token 获取成功')
     else:
