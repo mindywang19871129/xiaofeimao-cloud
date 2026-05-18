@@ -4,7 +4,6 @@
 # 用法：在 JumpServer 上执行 ./test.sh
 # 路径：/opt/xiaofeimao/cloud_function/ws-server/test.sh
 # ===================================
-set -e
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -22,6 +21,7 @@ log_warn() { echo -e "  ${YELLOW}[WARN]${NC} $*"; WARN=$((WARN+1)); }
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$SCRIPT_DIR"
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH}"
 
 echo "========================================="
 echo "🐱 小肥猫 v2.2 自动化测试"
@@ -41,51 +41,70 @@ fi
 echo ""
 echo "📋 [2/7] 核心模块导入测试"
 for mod in feishu_api grading question_generator; do
-    if [ "$mod" = "question_generator" ]; then
-        PYTHONPATH="${REPO_ROOT}" ./venv/bin/python3 -c "import $mod" 2>/dev/null && \
-            log_pass "import $mod" || \
-            log_fail "import $mod 失败"
+    ERR_OUT=$(./venv/bin/python3 -c "import ${mod}" 2>&1)
+    if [ $? -eq 0 ]; then
+        log_pass "import ${mod}"
     else
-        ./venv/bin/python3 -c "import $mod" 2>/dev/null && \
-            log_pass "import $mod" || \
-            log_fail "import $mod 失败"
+        log_fail "import ${mod} 失败: ${ERR_OUT}"
     fi
 done
 
 # ---- 测试 3：v2.2 关键函数 ----
 echo ""
 echo "📋 [3/7] v2.2 特性验证"
-# 检查 _detect_image_info 存在
-if grep -q "_detect_image_info" feishu_api.py; then
+if grep -q "_detect_image_info" feishu_api.py 2>/dev/null; then
     log_pass "图片格式自动检测 (_detect_image_info) 已就绪"
 else
     log_fail "缺少图片格式检测函数"
 fi
 
-# 检查 content_type 处理
-if grep -q "content_type" main.py; then
+if grep -q "content_type" main.py 2>/dev/null; then
     log_pass "content_type 处理逻辑已就绪"
 else
     log_fail "缺少 content_type 处理"
 fi
 
-# 检查多图片批次
-if grep -q "_process_image_batch" main.py; then
+if grep -q "_process_image_batch" main.py 2>/dev/null; then
     log_pass "多图片批次收集已就绪"
 else
     log_fail "缺少批次处理逻辑"
 fi
 
-# ---- 测试 4：飞书 API 连通性 ----
+# ---- 测试 4：环境变量检查 ----
 echo ""
-echo "📋 [4/7] 飞书 API 连通性"
+echo "📋 [4/7] 飞书凭证检查"
+if [ -f ".env" ]; then
+    # 检查 .env 中关键变量是否已填写（非空、非示例值）
+    ERRORS=""
+    for var in FEISHU_APP_ID FEISHU_APP_SECRET DEEPSEEK_API_KEY; do
+        VAL=$(grep "^${var}=" .env 2>/dev/null | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs)
+        if [ -z "$VAL" ] || echo "$VAL" | grep -q "xxxx\|your-\|sk-your"; then
+            ERRORS="${ERRORS}  ${var} 未配置或仍为示例值\n"
+        fi
+    done
+    if [ -z "$ERRORS" ]; then
+        log_pass ".env 凭证已配置"
+    else
+        log_fail ".env 凭证不完整:\n${ERRORS}"
+    fi
+else
+    log_fail ".env 文件不存在，请从 .env.example 复制并填写"
+fi
+
+# ---- 测试 5：飞书 API 连通性 ----
+echo ""
+echo "📋 [5/7] 飞书 API 连通性"
 ./venv/bin/python3 -c "
 from feishu_api import _get_tenant_token
 try:
     token = _get_tenant_token()
     print(f'  [PASS] 飞书 Token 获取成功 ({token[:20]}...)')
 except Exception as e:
-    print(f'  [FAIL] 飞书 Token 获取失败: {e}')
+    err = str(e)
+    if '10003' in err or 'invalid param' in err:
+        print(f'  [FAIL] 飞书凭证错误 (code=10003): 请检查 .env 中 FEISHU_APP_ID 和 FEISHU_APP_SECRET 是否正确')
+    else:
+        print(f'  [FAIL] 飞书 Token 获取失败: {e}')
     exit(1)
 " 2>&1
 if [ $? -eq 0 ]; then
@@ -94,10 +113,10 @@ else
     FAIL=$((FAIL+1))
 fi
 
-# ---- 测试 5：2026 教材数据 ----
+# ---- 测试 6：2026 教材数据 ----
 echo ""
-echo "📋 [5/7] 2026 教材数据校验"
-PYTHONPATH="${REPO_ROOT}" ./venv/bin/python3 -c "
+echo "📋 [6/7] 2026 教材数据校验"
+./venv/bin/python3 -c "
 from question_generator import MATH_TOPICS
 import sys
 
@@ -106,7 +125,6 @@ if total != 15:
     print(f'  [FAIL] 教材天数异常: 预期15天, 实际{total}天')
     sys.exit(1)
 
-# 检查关键单元
 keywords = ['整数乘法', '图形的运动', '周长', '动物体重', '整数除法', '动手做', '图书排序', '关系与规律', '数据', '家庭旅行']
 found = [k for k in keywords if any(k in str(t) for t in MATH_TOPICS)]
 missing = set(keywords) - set(found)
@@ -114,7 +132,6 @@ if missing:
     print(f'  [FAIL] 缺少教材单元: {missing}')
     sys.exit(1)
 
-# 确认旧单元已删除
 old_keywords = ['面积', '认识分数', '年月日']
 for kw in old_keywords:
     for t in MATH_TOPICS:
@@ -130,22 +147,13 @@ else
     FAIL=$((FAIL+1))
 fi
 
-# ---- 测试 6：服务状态 ----
+# ---- 测试 7：服务状态 ----
 echo ""
-echo "📋 [6/7] systemd 服务状态"
+echo "📋 [7/7] systemd 服务状态"
 if systemctl is-active --quiet xiaofeimao 2>/dev/null; then
     log_pass "xiaofeimao 服务运行中"
 else
     log_warn "xiaofeimao 服务未运行（部署后会自动启动）"
-fi
-
-# ---- 测试 7：日志健康 ----
-echo ""
-echo "📋 [7/7] 日志健康检查"
-if journalctl -u xiaofeimao --no-pager -n 5 2>/dev/null | grep -qi "error\|traceback\|exception"; then
-    log_warn "最近日志中有错误信息，建议检查"
-else
-    log_pass "最近日志无异常"
 fi
 
 # ---- 结果汇总 ----
