@@ -171,8 +171,9 @@ def save_mistake_to_bitable(
     student_answer: str,
     grade_result: dict,
     message_date: str,
+    image_key: str = "",
 ) -> bool:
-    """将错题存入飞书多维表格错题本"""
+    """将错题存入飞书多维表格错题本（支持图片来源追溯）"""
     if grade_result["correct"]:
         return True
 
@@ -194,6 +195,7 @@ def save_mistake_to_bitable(
         "来源": "长连接批改",
         "是否已同步": False,
         "录入时间": _date_to_timestamp(now_str),
+        "来源图片": image_key,  # 图片批改来源追溯
     }
 
     rid = bitable_add_record(feishu_client, BITABLE_APP_TOKEN, BITABLE_MISTAKE_TABLE_ID, fields)
@@ -218,12 +220,13 @@ def grade_submission(
     feishu_client,
     message_text: str,
     message_date: str,
+    image_key: str = "",
 ) -> dict:
     """
     完整批改流程
     1. 从 Bitable 读取当日题目
     2. 逐题批改
-    3. 错题入库
+    3. 错题入库（支持图片来源追溯）
     4. 返回批改结果
     """
     from feishu_api import bitable_list_records
@@ -293,7 +296,7 @@ def grade_submission(
             correct_count += 1
         else:
             wrong_count += 1
-            save_mistake_to_bitable(feishu_client, q, student_answer, grade, today)
+            save_mistake_to_bitable(feishu_client, q, student_answer, grade, today, image_key)
 
         results.append({
             "question": q,

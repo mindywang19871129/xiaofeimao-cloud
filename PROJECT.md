@@ -1,6 +1,6 @@
 # 小肥猫学习·项目全貌
 
-> 最后更新：2026-05-15 | 存档用途：避免每次加载大量上下文
+> 最后更新：2026-05-18 | 存档用途：避免每次加载大量上下文
 
 ## 一、项目概述
 
@@ -180,7 +180,55 @@ USER_OPEN_ID=<YOUR_USER_OPEN_ID>
 
 ---
 
-## 六、日常运维
+## 七、图片批改规则
+
+### 触发方式
+飞书单聊中发送图片消息（拍照的作业答案）即可触发批改，无需手动打文字。
+
+### 处理流程
+```
+飞书图片消息（message_type=image）
+  → 1. _download_image(image_key)：调用飞书 OpenAPI 下载图片二进制
+     GET https://open.feishu.cn/open-apis/im/v1/images/{image_key}
+     返回 Content-Type: image/*（二进制数据，非 JSON）
+  → 2. _ocr_image(image_bytes)：DeepSeek vision 模型 OCR 识别答案文本
+     模型: deepseek-chat（支持 vision）
+     提示词：只提取答案，按题号顺序输出，空格分隔
+  → 3. grade_submission(text, msg_date, image_key)：走正常批改流程
+  → 4. save_mistake_to_bitable(..., image_key)：错题记录「来源图片」字段
+```
+
+### 关键实现细节
+
+**图片下载（_download_image）**：
+- 飞书图片下载 API **直接返回二进制图片数据**（Content-Type: image/*）
+- 不能先 `resp.json()`，需先检查 Content-Type 判断是否为图片
+- 非图片响应（如 JSON 错误）才尝试解析 JSON 错误码
+
+**OCR 识别（_ocr_image）**：
+- 使用 DeepSeek 的 `deepseek-chat` 模型（已支持 vision）
+- 图片以 base64 编码通过 `image_url` 传入
+- OCR 提示词：提取所有答案，按题号顺序，多选/多空用逗号分隔
+- 识别结果直接作为答案文本走现有解析+批改流程
+
+**错题来源追溯**：
+- 错题本新增「来源图片」字段（文本类型，存储 image_key）
+- 文本批改：image_key 为空字符串
+- 图片批改：image_key 为飞书图片的唯一标识
+- 可通过 `https://open.feishu.cn/open-apis/im/v1/images/{image_key}` 回查原图
+
+### 消息处理优先级
+1. **图片消息**（message_type=image）→ 下载+OCR+批改
+2. **文本消息**（message_type=text）→ 提取文本+批改
+3. **富文本消息**（message_type=post）→ 提取文本+批改
+4. **其他类型** → 忽略并记录日志
+
+### 环境要求
+- 飞书 App 需订阅 `im.message.receive_v1` 事件（含图片类型）
+- DeepSeek API Key（需支持 vision 能力的模型）
+- 图片大小限制：飞书 API 限制 20MB 以内
+
+## 八、日常运维
 
 ### 更新代码
 ```bash

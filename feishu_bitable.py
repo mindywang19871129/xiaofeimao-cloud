@@ -118,6 +118,7 @@ MISTAKE_BOOK_TABLE = {
             "date_formatter": "yyyy-MM-dd HH:mm",
             "auto_fill": False
         }},
+        {"field_name": "来源图片", "type": 1},            # 文本（image_key，图片批改来源追溯）
     ]
 }
 
@@ -517,12 +518,14 @@ def push_daily_questions_to_bitable(app_token: str, table_id: str,
 
 
 def add_mistake_to_bitable(app_token: str, table_id: str, mistake: dict,
-                            source: str = "云函数批改") -> Optional[str]:
+                            source: str = "云函数批改",
+                            image_key: str = "") -> Optional[str]:
     """
     添加一条错题到 Bitable 错题本表
     Args:
         mistake: 错题数据字典
         source: 来源标签
+        image_key: 飞书图片 key（图片批改来源追溯）
     """
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -541,6 +544,7 @@ def add_mistake_to_bitable(app_token: str, table_id: str, mistake: dict,
         "来源": source,
         "是否已同步": False,
         "录入时间": _date_to_timestamp(now_str),
+        "来源图片": image_key,  # 图片批改来源追溯
     }
 
     return add_single_record(app_token, table_id, fields)
@@ -710,6 +714,7 @@ def bitable_record_to_mistake(record: dict) -> dict:
         "error_count": get_number("错误次数", 1),
         "status": _status_map(get_text("状态", "新错题")),
         "source": get_text("来源", "云函数批改"),
+        "image_key": get_text("来源图片"),
         "bitable_record_id": record.get("record_id", ""),
     }
 

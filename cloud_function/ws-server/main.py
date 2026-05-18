@@ -88,7 +88,7 @@ def _extract_message_text(message) -> str:
 
 
 def _download_image(image_key: str) -> bytes:
-    """从飞书下载图片"""
+    """从飞书下载图片（API 返回二进制图片数据，非 JSON）"""
     token_resp = fs_client.auth.v3.tenant_access_token.internal.create(
         lark.auth.v3.CreateTenantAccessTokenReq(
             body={"app_id": APP_ID, "app_secret": APP_SECRET}
@@ -99,9 +99,20 @@ def _download_image(image_key: str) -> bytes:
     headers = {"Authorization": f"Bearer {token}"}
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
-    data = resp.json()
-    if data.get("code") != 0:
-        raise Exception(f"下载图片失败: {data.get('msg')}")
+
+    # 飞书图片下载 API 直接返回二进制图片数据（Content-Type: image/*）
+    content_type = resp.headers.get("Content-Type", "")
+    if "image" in content_type:
+        return resp.content
+
+    # 非图片响应（如 JSON 错误信息），尝试解析检查
+    try:
+        data = resp.json()
+        if data.get("code") != 0:
+            raise Exception(f"下载图片失败: {data.get('msg')}")
+    except (json.JSONDecodeError, ValueError):
+        pass  # 无法解析也为二进制，直接返回
+
     return resp.content
 
 
@@ -138,6 +149,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
         sender_id = event.sender.sender_id.open_id or USER_OPEN_ID
         msg_timestamp = int(message.create_time) if message.create_time else 0
         msg_date = datetime.fromtimestamp(msg_timestamp / 1000).strftime("%Y-%m-%d")
+        image_key = ""  # 图片消息的 image_key，文本消息为空
 
         # 1️⃣ 处理图片消息：下载 → OCR → 提取答案
         if message.message_type == "image":
@@ -189,7 +201,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
 
         # 4️⃣ 执行批改
         logger.info("[批改] 开始处理...")
-        result = grade_submission(fs_client, text, msg_date)
+        result = grade_submission(fs_client, text, msg_date, image_key)
 
         if result["success"]:
             title, content = format_grading_card(result)
