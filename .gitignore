@@ -41,6 +41,5 @@ archive/
 com.xiaofeimao.*.plist
 
 # 本地配置文件（含 Bitable token）
-bitable_config.json
 *.tar.gz
 *.zip
