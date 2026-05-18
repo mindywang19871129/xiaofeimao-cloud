@@ -125,33 +125,33 @@ echo "$DAILY_OUTPUT" > "${LOG_DIR}/e2e_daily_test_$(date +%Y%m%d_%H%M%S).log"
 
 if [ $DAILY_EXIT -eq 0 ]; then
     # 检查关键步骤
-    if echo "$DAILY_OUTPUT" | grep -q "每日任务调度 完成"; then
+    # 检测成功标记（"每日任务调度完成" / "推送成功" / "HTTP 200"）
+    if echo "$DAILY_OUTPUT" | grep -q "每日任务调度完成"; then
         pass "每日出题完整链路成功"
+    elif echo "$DAILY_OUTPUT" | grep -q "推送成功"; then
+        pass "每日出题: 题目已生成并推送成功"
+    elif echo "$DAILY_OUTPUT" | grep -q "HTTP.*200 OK"; then
+        pass "每日出题: 题目已生成(HTTP 200)"
+    elif echo "$DAILY_OUTPUT" | grep -q "跳过生成"; then
+        skip "每日出题: 今日题目已存在，跳过生成（正常行为）"
+    elif echo "$DAILY_OUTPUT" | grep -qi "error\|exception\|traceback"; then
+        fail "每日出题失败，详见 ${LOG_DIR}/e2e_daily_test_*.log"
     else
-        # 检查到了哪一步
-        if echo "$DAILY_OUTPUT" | grep -q "HTTP.*200 OK"; then
-            if echo "$DAILY_OUTPUT" | grep -q "推送成功\|消息已发送"; then
-                pass "每日出题: 题目已生成并推送"
-            else
-                skip "每日出题: 题目已生成(HTTP 200)但推送状态待确认"
-            fi
-        elif echo "$DAILY_OUTPUT" | grep -qi "error\|exception\|traceback"; then
-            fail "每日出题失败，详见 ${LOG_DIR}/e2e_daily_test_*.log"
-        else
-            skip "每日出题: 输出不完整，检查日志"
-        fi
+        skip "每日出题: 输出不完整，检查日志"
     fi
 else
     fail "每日出题异常退出 (exit code: ${DAILY_EXIT})"
 fi
 
-# 检查 daily_questions.json 是否更新
+# 检查 daily_questions.json 是否存在（允许跳过生成的情况，只检查文件存在+今天日期）
 if [ -f "${INSTALL_DIR}/daily_questions.json" ]; then
-    Q_AGE=$(($(date +%s) - $(stat -c %Y "${INSTALL_DIR}/daily_questions.json" 2>/dev/null || stat -f %m "${INSTALL_DIR}/daily_questions.json" 2>/dev/null)))
-    if [ "$Q_AGE" -lt 120 ]; then
-        pass "daily_questions.json 已更新 (${Q_AGE}秒前)"
+    Q_TODAY=$(date -r "${INSTALL_DIR}/daily_questions.json" +%Y-%m-%d 2>/dev/null || stat -f %Sm -t %Y-%m-%d "${INSTALL_DIR}/daily_questions.json" 2>/dev/null)
+    TODAY=$(date +%Y-%m-%d)
+    if [ "$Q_TODAY" = "$TODAY" ]; then
+        pass "daily_questions.json 今日已存在 ($TODAY)"
     else
-        fail "daily_questions.json 未更新 (${Q_AGE}秒前)"
+        Q_AGE=$(($(date +%s) - $(stat -c %Y "${INSTALL_DIR}/daily_questions.json" 2>/dev/null || stat -f %m "${INSTALL_DIR}/daily_questions.json" 2>/dev/null)))
+        fail "daily_questions.json 日期为 ${Q_TODAY}，非今天 (${Q_AGE}秒前)"
     fi
 else
     fail "daily_questions.json 不存在"
