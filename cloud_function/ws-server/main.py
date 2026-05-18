@@ -13,24 +13,32 @@
 import os
 import sys
 import json
+import time
+import threading
 import logging
 import base64
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import defaultdict
 from openai import OpenAI
 
 import lark_oapi as lark
 from lark_oapi.api.im.v1.model.p2_im_message_receive_v1 import P2ImMessageReceiveV1
 
 # 导入本地模块
-from feishu_api import create_client, send_feishu_card, send_feishu_text
+from feishu_api import create_client, send_feishu_card, send_feishu_text, send_feishu_image, upload_feishu_image
 from grading import (
     grade_submission,
+    grade_submission_multi_image,
     format_grading_card,
+    format_partial_grading_card,
     is_command,
     detect_modification_suggestion,
     process_modification_suggestion,
     load_grading_rules,
+    check_previous_day_completion,
+    get_daily_progress,
+    mark_questions_graded,
 )
 
 # ==================== 配置 ====================
@@ -53,6 +61,136 @@ logger = logging.getLogger("xiaofeimao")
 
 # 创建飞书 SDK 客户端（用于 API 调用：bitable、发消息等）
 fs_client = create_client(APP_ID, APP_SECRET)
+
+
+# ==================== 图片批次管理 ====================
+
+# 图片批次: {(sender_id, date_str): {"images": [(image_key, image_bytes, ocr_text), ...], "timer": Timer, "msg_ids": []}}
+_image_batches = {}
+_batch_lock = threading.Lock()
+BATCH_WAIT_SECONDS = 60  # 等待新图片的最大秒数
+
+
+def _start_batch_timer(sender_id: str, msg_date: str):
+    """启动/重置批次定时器，超时后自动处理批次"""
+    key = (sender_id, msg_date)
+
+    def process():
+        time.sleep(BATCH_WAIT_SECONDS)
+        with _batch_lock:
+            batch = _image_batches.get(key)
+            if batch:
+                logger.info(f"[批次] 定时器触发，开始处理 {len(batch['images'])} 张图片")
+                _process_image_batch(sender_id, msg_date, batch)
+                del _image_batches[key]
+
+    timer = threading.Thread(target=process, daemon=True)
+    timer.start()
+
+    with _batch_lock:
+        if key in _image_batches:
+            _image_batches[key]["timer"] = timer
+
+
+def _process_image_batch(sender_id: str, msg_date: str, batch: dict):
+    """处理一个完整的图片批次"""
+    images = batch["images"]
+    image_count = len(images)
+
+    logger.info(f"[批次处理] sender={sender_id[:12]}... date={msg_date} images={image_count}")
+
+    # 1️⃣ 逐日前置检查
+    prev_check = check_previous_day_completion(msg_date)
+    if not prev_check.get("can_proceed", True):
+        msg = (
+            f"⛔ **每日练习规则**\n\n"
+            f"📅 你必须先完成 **{prev_check['prev_date']}** 的练习才能开始 {msg_date} 的！\n\n"
+        )
+        if prev_check.get("remaining_questions"):
+            msg += f"📋 **{prev_check['prev_date']} 剩余题目**：\n"
+            for q in prev_check["remaining_questions"]:
+                msg += f"  • {q.get('id', '?')} - {q.get('content', '')[:60]}...\n"
+            msg += "\n"
+        msg += f"✅ 完成后发送答案即可自动解锁今天的练习。"
+        send_feishu_text(fs_client, sender_id, msg)
+        return
+
+    # 2️⃣ 发送处理中提示
+    send_feishu_text(
+        fs_client, sender_id,
+        f"📸 收到 {image_count} 张图片，正在识别中...\n"
+        f"🐱 小肥猫会逐张识别并匹配对应的题目区域。"
+    )
+
+    # 3️⃣ 逐张 OCR + 汇总
+    all_ocr_results = []
+    for i, img_tuple in enumerate(images):
+        # 兼容 3 元素和 4 元素元组
+        if len(img_tuple) >= 4:
+            img_key, img_bytes, _, content_type = img_tuple[:4]
+        else:
+            img_key, img_bytes, _ = img_tuple[:3]
+            content_type = "image/jpeg"
+        try:
+            ocr_text = _ocr_image(img_bytes)
+            all_ocr_results.append({
+                "index": i + 1,
+                "image_key": img_key,
+                "ocr_text": ocr_text,
+            })
+            logger.info(f"[OCR-{i+1}] 图片{i+1} 识别: {ocr_text[:80]}...")
+        except Exception as e:
+            logger.error(f"[OCR-{i+1}] 识别失败: {e}")
+            all_ocr_results.append({
+                "index": i + 1,
+                "image_key": img_key,
+                "ocr_text": "",
+                "error": str(e)[:100],
+            })
+
+    # 4️⃣ 合并 OCR 结果
+    combined_text_parts = []
+    for r in all_ocr_results:
+        if r.get("ocr_text"):
+            combined_text_parts.append(f"[图{r['index']}] {r['ocr_text']}")
+    combined_text = "\n".join(combined_text_parts)
+
+    if not combined_text.strip():
+        send_feishu_text(fs_client, sender_id, "⚠️ 未能从图片中识别到答案，请拍照更清晰后重试。")
+        return
+
+    # 5️⃣ 多图片区段匹配 + 部分批改
+    logger.info(f"[批次处理] 开始区段匹配批改，共 {len(combined_text_parts)} 段OCR结果")
+    result = grade_submission_multi_image(
+        fs_client, combined_text, msg_date,
+        all_ocr_results, image_keys=[r["image_key"] for r in all_ocr_results]
+    )
+
+    # 6️⃣ 输出结果
+    if result["success"]:
+        title, content = format_partial_grading_card(result)
+        send_feishu_card(fs_client, sender_id, title, content)
+
+        # 通知剩余题目
+        if result.get("remaining_questions"):
+            remaining = result["remaining_questions"]
+            remaining_msg = f"📋 **还有 {len(remaining)} 道题未作答**，拍照发送即可继续批改：\n"
+            for q in remaining[:5]:
+                remaining_msg += f"  • {q.get('id', '?')} - {q.get('content', '')[:50]}...\n"
+            if len(remaining) > 5:
+                remaining_msg += f"  ... 等 {len(remaining)} 道题\n"
+            send_feishu_text(fs_client, sender_id, remaining_msg)
+            # 标记已批改的题目
+            graded_ids = [d["question"]["id"] for d in result.get("details", [])]
+            mark_questions_graded(msg_date, graded_ids)
+
+        logger.info(
+            f"[批次完成] {result['correct_count']}✓/{result.get('partial_count',0)}🔶/{result['wrong_count']}✗ "
+            f"得分率 {result['pass_rate']}% 已完成 {result.get('graded_count',0)}/{result.get('total_questions',0)}"
+        )
+    else:
+        send_feishu_text(fs_client, sender_id, result.get("summary", "批改未成功，请检查图片内容"))
+        logger.info(f"[批次失败] {result.get('summary','')[:80]}")
 
 
 # ==================== 事件处理 ====================
@@ -94,21 +232,26 @@ def _extract_message_text(message) -> str:
     return ""
 
 
-def _download_image(image_key: str) -> bytes:
-    """从飞书下载图片（API 返回二进制图片数据，非 JSON）"""
-    # 使用 HTTP 方式获取 token（避免 SDK 版本兼容问题）
-    token_url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
-    token_resp = requests.post(token_url, json={"app_id": APP_ID, "app_secret": APP_SECRET}, timeout=15)
-    token = token_resp.json()["tenant_access_token"]
+def _download_image(image_key: str) -> tuple:
+    """
+    从飞书下载图片。
+    v2.2 修复：复用 feishu_api 的 token 缓存，避免每次请求都获取新 token；
+    同时返回图片二进制数据和 Content-Type 供上传时复用。
+
+    Returns: (image_bytes: bytes, content_type: str)
+    """
+    from feishu_api import _get_tenant_token
+
+    token = _get_tenant_token()
     url = f"https://open.feishu.cn/open-apis/im/v1/images/{image_key}"
     headers = {"Authorization": f"Bearer {token}"}
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
 
     # 飞书图片下载 API 直接返回二进制图片数据（Content-Type: image/*）
-    content_type = resp.headers.get("Content-Type", "")
+    content_type = resp.headers.get("Content-Type", "image/jpeg")
     if "image" in content_type:
-        return resp.content
+        return resp.content, content_type
 
     # 非图片响应（如 JSON 错误信息），尝试解析检查
     try:
@@ -118,7 +261,7 @@ def _download_image(image_key: str) -> bytes:
     except (json.JSONDecodeError, ValueError):
         pass  # 无法解析也为二进制，直接返回
 
-    return resp.content
+    return resp.content, content_type
 
 
 def _ocr_image(image_bytes: bytes) -> str:
@@ -145,6 +288,11 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
     """
     处理飞书消息事件（WebSocket 推送）
     支持 text / post / image 三种消息类型
+
+    v2.2 新增：
+    - 多图片批次收集（60秒内图片归入同一批次统一处理）
+    - 逐日前置完成检查
+    - 区段匹配部分批改
     """
     try:
         event = data.event
@@ -154,41 +302,59 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
         sender_id = event.sender.sender_id.open_id or USER_OPEN_ID
         msg_timestamp = int(message.create_time) if message.create_time else 0
         msg_date = datetime.fromtimestamp(msg_timestamp / 1000).strftime("%Y-%m-%d")
-        image_key = ""  # 图片消息的 image_key，文本消息为空
 
-        # 1️⃣ 处理图片消息：下载 → OCR → 提取答案
+        # ========== 1️⃣ 图片消息：加入批次收集 ==========
         if message.message_type == "image":
             msg_content = json.loads(message.content)
             image_key = msg_content.get("image_key", "")
-            logger.info(f"[图片] sender={sender_id[:12]}... image_key={image_key[:20]}...")
+            logger.info(f"[图片] sender={sender_id[:12]}... image_key={image_key[:30]}...")
 
             if not image_key:
                 return
 
-            send_feishu_text(fs_client, sender_id, "🔍 正在识别图片中的答案...")
+            # 下载图片
+            send_feishu_text(fs_client, sender_id, f"📸 收到图片，正在加入批次...（{BATCH_WAIT_SECONDS}秒内可继续发图）")
             try:
-                image_bytes = _download_image(image_key)
-                text = _ocr_image(image_bytes)
-                logger.info(f"[OCR] 识别结果: {text[:100]}")
+                image_bytes, content_type = _download_image(image_key)
             except Exception as e:
-                logger.error(f"[OCR失败] {e}")
-                send_feishu_text(fs_client, sender_id, f"⚠️ 图片识别失败: {str(e)[:80]}")
+                logger.error(f"[下载失败] {e}")
+                send_feishu_text(fs_client, sender_id, f"⚠️ 图片下载失败: {str(e)[:80]}")
                 return
 
-            if not text:
-                send_feishu_text(fs_client, sender_id, "⚠️ 未能从图片中识别到答案文本，请拍照更清晰后重试。")
-                return
+            # 加入批次（保留 content_type 供后续上传复用）
+            batch_key = (sender_id, msg_date)
+            with _batch_lock:
+                if batch_key not in _image_batches:
+                    _image_batches[batch_key] = {"images": [], "timer": None}
+                    # 立即启动定时器（在锁外也启动一次确保定时器存在）
+                _image_batches[batch_key]["images"].append((image_key, image_bytes, msg_date, content_type))
+                batch_size = len(_image_batches[batch_key]["images"])
+                is_new_batch = batch_size == 1
+                logger.info(f"[批次] 当前批次有 {batch_size} 张图片")
 
-        # 2️⃣ 处理文本消息
-        else:
-            text = _extract_message_text(message)
-            if not text:
-                logger.info(f"忽略非文本/非图片消息: {message.message_type}")
-                return
+            # 首次图片启动定时器
+            if is_new_batch:
+                _start_batch_timer(sender_id, msg_date)
+            else:
+                # 通知用户已加入批次
+                send_feishu_text(
+                    fs_client, sender_id,
+                    f"📸 第 {batch_size} 张图片已加入批次（共{len(_image_batches.get(batch_key, {}).get('images',[]))}张）。\n"
+                    f"⏳ 将在收到最后一张图后 {BATCH_WAIT_SECONDS} 秒自动处理。"
+                )
+
+            return  # 图片消息不继续走下面的文本处理流程
+
+        # ========== 2️⃣ 文本消息：正常处理 ==========
+        text = _extract_message_text(message)
+        if not text:
+            logger.info(f"忽略非文本/非图片消息: {message.message_type}")
+            return
 
         if not text:
             return
 
+        image_key = ""  # 文本消息无 image_key
         logger.info(f"[消息] sender={sender_id[:12]}... type={message.message_type} text={text[:80]}")
 
         # 3️⃣ 修改建议检测（优先于指令检测）
@@ -224,6 +390,64 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
                 )
             return
 
+        # 3.8️⃣ 发送今日题目指令
+        if any(kw in text for kw in ["今日题目", "重新发题目", "发题目", "题目列表", "今天题目", "今天的题"]):
+            logger.info("[指令] 发送今日题目")
+            try:
+                from feishu_api import bitable_list_records
+                today = datetime.now().strftime("%Y-%m-%d")
+                filter_str = f'CurrentValue.[日期] = "{today}"'
+                records = bitable_list_records(fs_client, BITABLE_APP_TOKEN, BITABLE_DAILY_TABLE_ID, filter_str)
+
+                if not records:
+                    send_feishu_text(fs_client, sender_id, f"📭 {today} 还没有题目记录，请等待每日出题推送。")
+                    return
+
+                # 按科目分组
+                math_qs = []
+                eng_qs = []
+                for rec in records:
+                    f = rec.fields or {}
+                    q = {
+                        "id": f.get("题号", ""),
+                        "type": f.get("题型", ""),
+                        "content": f.get("题目内容", ""),
+                        "score": f.get("分值", ""),
+                        "subject": f.get("科目", ""),
+                    }
+                    if q["subject"] == "数学":
+                        math_qs.append(q)
+                    else:
+                        eng_qs.append(q)
+
+                title = f"📝 今日题目 · {today}"
+                content = f"📅 **{today} 学习卷** 共 {len(records)} 道题\n\n"
+
+                if math_qs:
+                    content += "📐 **数学**\n"
+                    for q in math_qs:
+                        content += f"• **{q['id']}** [{q['type']}] ({q['score']}分)\n"
+                        content += f"  {q['content'][:120]}\n\n"
+
+                if eng_qs:
+                    content += "📘 **英语 / KET**\n"
+                    for q in eng_qs:
+                        content += f"• **{q['id']}** [{q['type']}] ({q['score']}分)\n"
+                        content += f"  {q['content'][:120]}\n\n"
+
+                content += "---\n"
+                content += "💡 发送答案格式：\n"
+                content += "• 直接回复答案（如 `83 44 forget arrive`）\n"
+                content += "• 或拍照发图自动识别\n"
+                content += "🐱 小肥猫会自动识别题目并批改！"
+
+                send_feishu_card(fs_client, sender_id, title, content)
+                logger.info(f"[题目发送] 已发送 {len(records)} 道题 ({len(math_qs)}数/{len(eng_qs)}英)")
+            except Exception as e:
+                logger.error(f"[题目发送] 失败: {e}")
+                send_feishu_text(fs_client, sender_id, f"⚠️ 获取题目失败: {str(e)[:100]}")
+            return
+
         # 4️⃣ 查看规则 + 指令拦截
         if "查看规则" in text or "规则列表" in text or "所有规则" in text:
             logger.info("[指令] 查看规则")
@@ -240,7 +464,27 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
                 send_feishu_text(fs_client, sender_id, "📋 暂无自定义规则（使用默认批改标准）")
             return
 
-        # 4️⃣ 指令拦截
+        # 4.5️⃣ 查看进度指令
+        if "查看进度" in text or "完成情况" in text or "今日进度" in text:
+            logger.info("[指令] 查看进度")
+            progress = get_daily_progress(msg_date)
+            if progress:
+                total = progress.get("total_questions", 0)
+                graded = progress.get("graded_question_ids", [])
+                msg = f"📊 **{msg_date} 练习进度**\n\n"
+                msg += f"📝 总题数：{total} 道\n"
+                msg += f"✅ 已完成：{len(graded)} 道\n"
+                msg += f"⏳ 待完成：{total - len(graded)} 道\n"
+                if total > len(graded):
+                    msg += f"\n继续发送答案或拍照即可完成剩余题目！"
+                else:
+                    msg += f"\n🎉 今日练习已全部完成！"
+                send_feishu_text(fs_client, sender_id, msg)
+            else:
+                send_feishu_text(fs_client, sender_id, f"📭 {msg_date} 暂无练习数据，请等待每日出题推送。")
+            return
+
+        # 5️⃣ 指令拦截
         if is_command(text):
             logger.info(f"[指令] 识别为指令: {text[:50]}")
             send_feishu_text(
@@ -253,13 +497,34 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
             )
             return
 
-        # 5️⃣ 执行批改
+        # 5.5️⃣ 逐日前置检查（文本批改也需检查）
+        prev_check = check_previous_day_completion(msg_date)
+        if not prev_check.get("can_proceed", True):
+            msg = (
+                f"⛔ **每日练习规则**\n\n"
+                f"📅 你必须先完成 **{prev_check['prev_date']}** 的练习才能开始 {msg_date} 的！\n\n"
+            )
+            if prev_check.get("remaining_questions"):
+                msg += f"📋 **{prev_check['prev_date']} 剩余题目**：\n"
+                for q in prev_check["remaining_questions"]:
+                    msg += f"  • {q.get('id', '?')} - {q.get('content', '')[:60]}...\n"
+                msg += "\n"
+            msg += f"✅ 完成后发送答案即可自动解锁今天的练习。"
+            send_feishu_text(fs_client, sender_id, msg)
+            return
+
+        # 6️⃣ 执行批改
         logger.info("[批改] 开始处理...")
         result = grade_submission(fs_client, text, msg_date, image_key)
 
         if result["success"]:
             title, content = format_grading_card(result)
             send_feishu_card(fs_client, sender_id, title, content)
+
+            # 记录进度
+            graded_ids = [d["question"]["id"] for d in result.get("details", [])]
+            mark_questions_graded(msg_date, graded_ids)
+
             logger.info(
                 f"[批改完成] {result['correct_count']}✓/{result.get('partial_count',0)}🔶/{result['wrong_count']}✗ "
                 f"得分率 {result['pass_rate']}%"

@@ -511,6 +511,25 @@ def run(dry_run=False, force=False):
         if push_success and not dry_run:
             mark_pushed(today_str, mode="weekend" if friday_mode else "daily")
 
+            # 初始化每日进度追踪（v2.2）
+            try:
+                sys.path.insert(0, str(WORK_DIR / "cloud_function" / "ws-server"))
+                from grading import set_daily_total_questions
+                if friday_mode:
+                    friday = today_str
+                    saturday = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+                    sunday = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")
+                    for day_key, day_data in bundle.items():
+                        total = len(day_data.get("math", {}).get("questions", [])) + len(day_data.get("english", {}).get("questions", []))
+                        set_daily_total_questions(day_key, total)
+                    logger.info(f"📊 进度追踪已初始化：周五~周日三天")
+                else:
+                    total = len(data.get("math", {}).get("questions", [])) + len(data.get("english", {}).get("questions", []))
+                    set_daily_total_questions(today_str, total)
+                    logger.info(f"📊 进度追踪已初始化：{today_str} 共 {total} 题")
+            except Exception as e:
+                logger.warning(f"⚠️ 进度追踪初始化失败(不影响主流程): {e}")
+
     elapsed = (datetime.now() - start_time).total_seconds()
     status = "✅ 成功" if push_success else ("⏭️ Dry-run" if dry_run else "❌ 失败")
     bt_status = "✅" if bitable_success else "⚠️"

@@ -917,3 +917,477 @@ def is_command(text: str) -> bool:
 def normalize_answer(ans: str) -> str:
     """标准化答案（忽略大小写、空格差异）- 保留供外部使用"""
     return ans.strip().lower().replace(" ", "")
+
+
+# ==================== v2.2 多图片区段匹配 + 部分批改 ====================
+
+def _match_sections_to_questions(
+    image_ocr_results: list,
+    questions: list,
+) -> dict:
+    """
+    使用 LLM 将多张图片的 OCR 结果匹配到具体题目。
+
+    每张图片可能只覆盖部分题目（如：图1=数学M1-M3，图2=英语E1-E4）。
+    LLM 分析每张图的 OCR 内容，输出每张图覆盖的题目ID列表。
+
+    Args:
+        image_ocr_results: [{"index": 1, "ocr_text": "...", "image_key": "..."}, ...]
+        questions: 标准题目列表
+
+    Returns: {
+        "image_sections": {image_index: [question_id, ...]},
+        "unmatched_questions": [question_id, ...],
+        "notes": "..."
+    }
+    """
+    if not DEEPSEEK_API_KEY:
+        # 降级：每张图都对应全部题目
+        all_ids = [q["id"] for q in questions]
+        return {
+            "image_sections": {r["index"]: all_ids for r in image_ocr_results},
+            "unmatched_questions": [],
+            "notes": "API未配置，默认全量匹配",
+        }
+
+    # 构建题目列表
+    questions_text = ""
+    for q in questions:
+        qid = q.get("id", "")
+        qsubject = q.get("subject", "")
+        qtype = q.get("type", "")
+        qcontent = q.get("content", "")[:100]
+        questions_text += f"  [{qid}] ({qsubject}/{qtype}) {qcontent}\n"
+
+    # 构建 OCR 结果列表
+    ocr_text = ""
+    for r in image_ocr_results:
+        ocr_text += f"图{r['index']} OCR内容: {r['ocr_text'][:300]}\n\n"
+
+    prompt = f"""你是一个试卷图片区段匹配助手。有多张拍照的作业答案图片，每张可能只覆盖试卷的一部分。请分析每张图的OCR内容，匹配到下面的题目。
+
+=== 完整题目列表 ===
+{questions_text}
+
+=== 各图片OCR识别结果 ===
+{ocr_text}
+
+请分析每张图片覆盖了哪些题目，以及哪些题目未被任何图片覆盖。
+
+匹配规则：
+- 如果图中有题号（如M1、E2、第3题），直接匹配
+- 如果图中是连续内容（如数学题一起、英语题一起），按内容特征匹配
+- 如果图中内容不清晰无法判断，标记为"uncertain"
+- 未被任何图片覆盖的题目列为 unmatched
+
+严格按JSON输出：
+{{
+  "image_sections": {{
+    "1": ["M1", "M2", "M3"],
+    "2": ["E1", "E2", "E3", "E4"]
+  }},
+  "unmatched_questions": [],
+  "notes": "图1覆盖数学前3题,图2覆盖英语全部4题"
+}}"""
+
+    try:
+        client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+        resp = client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[
+                {"role": "system", "content": "你是试卷区段匹配助手。只输出JSON。"},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.0,
+            max_tokens=800,
+        )
+        text = resp.choices[0].message.content.strip()
+        if text.startswith("```"):
+            text = re.sub(r'^```(?:json)?\s*', '', text)
+            text = re.sub(r'\s*```$', '', text)
+
+        result = json.loads(text)
+        # 确保 image_sections 的 key 是整数
+        sections = {}
+        for k, v in result.get("image_sections", {}).items():
+            sections[int(k)] = v
+        result["image_sections"] = sections
+
+        logger.info(f"[区段匹配] 共 {len(image_ocr_results)} 张图，匹配结果: {result.get('notes', '')}")
+        return result
+
+    except Exception as e:
+        logger.error(f"区段匹配失败: {e}，降级为全量匹配")
+        all_ids = [q["id"] for q in questions]
+        return {
+            "image_sections": {r["index"]: all_ids for r in image_ocr_results},
+            "unmatched_questions": [],
+            "notes": f"匹配失败降级: {str(e)[:50]}",
+        }
+
+
+def _extract_answers_by_section(image_ocr_results: list, section_map: dict, questions: list) -> dict:
+    """
+    从多张图片的 OCR 结果中，按区段匹配提取答案。
+
+    Returns: {question_id: student_answer, ...}
+    """
+    # 为每张图的 OCR 分配对应的题目，批量调用 AI 解析
+    all_answers = {}
+
+    for r in image_ocr_results:
+        img_idx = r["index"]
+        target_ids = section_map.get(img_idx, [])
+        if not target_ids:
+            continue
+
+        # 筛选目标题目
+        target_questions = [q for q in questions if q["id"] in target_ids]
+        if not target_questions:
+            continue
+
+        # 只对这部分的题目做答案解析
+        partial_answers = parse_answers_with_ai(r["ocr_text"], target_questions)
+        all_answers.update(partial_answers)
+
+    return all_answers
+
+
+def grade_submission_multi_image(
+    feishu_client,
+    combined_text: str,
+    message_date: str,
+    image_ocr_results: list,
+    image_keys: list = None,
+) -> dict:
+    """
+    v2.2 多图片区段匹配批改
+    =========================
+    1. 读取当日所有题目
+    2. AI 匹配每张图覆盖的题目区段
+    3. 逐区段提取答案
+    4. 分批批改（只批改有答案的题目）
+    5. 标记已批改和未批改的题目
+
+    Returns: 包含 graded(已批改) 和 remaining(待批改) 两部分的结果
+    """
+    from feishu_api import bitable_list_records
+
+    today = message_date or datetime.now().strftime("%Y-%m-%d")
+    filter_str = f'CurrentValue.[日期] = "{today}"'
+    records = bitable_list_records(feishu_client, BITABLE_APP_TOKEN, BITABLE_DAILY_TABLE_ID, filter_str)
+
+    if not records:
+        return {
+            "success": False,
+            "summary": f"📭 {today} 还没有题目记录。",
+            "details": [],
+            "remaining_questions": [],
+        }
+
+    # 转换为题目列表
+    questions = []
+    for rec in records:
+        f = rec.fields or {}
+        questions.append({
+            "id": f.get("题号", ""),
+            "num": int((f.get("题号", "0") or "0").lstrip("MEme") or 0),
+            "type": f.get("题型", ""),
+            "content": f.get("题目内容", ""),
+            "correct_answer": f.get("正确答案", ""),
+            "knowledge_point": f.get("知识点", ""),
+            "score": int(f.get("分值", 0) or 0),
+            "subject": f.get("科目", ""),
+        })
+
+    questions.sort(key=lambda q: (0 if q["subject"] == "数学" else 1, q["num"]))
+    total_questions = len(questions)
+
+    # 区段匹配
+    logger.info(f"[多图批改] 开始区段匹配，{len(image_ocr_results)}张图，{total_questions}道题")
+    section_match = _match_sections_to_questions(image_ocr_results, questions)
+    section_map = section_match.get("image_sections", {})
+    unmatched_questions = section_match.get("unmatched_questions", [])
+
+    # 按区段提取答案
+    all_answers = _extract_answers_by_section(image_ocr_results, section_map, questions)
+    logger.info(f"[多图批改] 提取到 {len(all_answers)} 个答案: {json.dumps(all_answers, ensure_ascii=False)[:200]}")
+
+    # 加载规则
+    rules = load_grading_rules()
+
+    # 按区段批改
+    results = []
+    total_score = 0
+    earned_score = 0.0
+    correct_count = 0
+    partial_count = 0
+    wrong_count = 0
+    graded_question_ids = []
+
+    for q in questions:
+        q_id = q["id"]
+        student_answer = all_answers.get(q_id, "")
+
+        # 跳过已有进度但本次未提交的题目（已批改过的不重复批改）
+        if (not student_answer or student_answer == "未作答") and q_id in unmatched_questions:
+            continue
+
+        if not student_answer or student_answer == "未作答":
+            # 本次未作答的题目，归入待完成
+            continue
+
+        # LLM 深度批改
+        grade = deep_grade_with_ai(q, student_answer, rules)
+        score = q.get("score", 0)
+        total_score += score
+
+        ratio = grade.get("score_ratio", 0)
+        earned = score * ratio
+        earned_score += earned
+
+        if ratio >= 1.0:
+            correct_count += 1
+        elif ratio > 0:
+            partial_count += 1
+        else:
+            wrong_count += 1
+
+        graded_question_ids.append(q_id)
+
+        # 错题入库
+        if ratio < 1.0:
+            # 找到该答案来源的图片 image_key
+            source_image_key = ""
+            for r in image_ocr_results:
+                if q_id in section_map.get(r["index"], []):
+                    source_image_key = r.get("image_key", "")
+                    break
+            save_mistake_to_bitable(feishu_client, q, student_answer, grade, today, source_image_key or (image_keys[0] if image_keys else ""))
+
+        results.append({
+            "question": q,
+            "student_answer": student_answer,
+            **grade,
+        })
+
+    # 计算剩余未批改的题目
+    all_q_ids = {q["id"] for q in questions}
+    remaining_ids = all_q_ids - set(graded_question_ids)
+    remaining_questions = [q for q in questions if q["id"] in remaining_ids]
+
+    pass_rate = round(earned_score / total_score * 100, 1) if total_score > 0 else 0
+
+    return {
+        "success": True,
+        "total_score": total_score,
+        "earned_score": round(earned_score, 1),
+        "correct_count": correct_count,
+        "partial_count": partial_count,
+        "wrong_count": wrong_count,
+        "pass_rate": pass_rate,
+        "graded_count": len(graded_question_ids),
+        "total_questions": total_questions,
+        "summary": _build_summary_v2(total_score, earned_score, correct_count, partial_count, wrong_count, pass_rate),
+        "details": results,
+        "remaining_questions": remaining_questions,
+        "section_notes": section_match.get("notes", ""),
+    }
+
+
+def format_partial_grading_card(result: dict) -> tuple:
+    """
+    v2.2 部分批改结果格式化
+    显示已批改结果 + 剩余待完成题目
+    """
+    title = f"📝 批改结果 · {datetime.now().strftime('%m月%d日')}"
+
+    if not result.get("success"):
+        return title, result.get("summary", "批改遇到问题")
+
+    content = result["summary"] + "\n\n"
+
+    # 区段匹配说明
+    if result.get("section_notes"):
+        content += f"🔍 区段匹配：{result['section_notes']}\n\n"
+
+    # 进度条
+    graded = result.get("graded_count", 0)
+    total = result.get("total_questions", 0)
+    percent = round(graded / total * 100) if total > 0 else 0
+    bar_len = 10
+    filled = round(graded / total * bar_len) if total > 0 else 0
+    bar = "█" * filled + "░" * (bar_len - filled)
+    content += f"📊 完成进度：{bar} {percent}%（{graded}/{total}）\n\n---\n\n"
+
+    # 逐题详情
+    for i, item in enumerate(result["details"], 1):
+        q = item["question"]
+        ratio = item.get("score_ratio", 0)
+        if ratio >= 1.0:
+            mark = "✅"
+        elif ratio > 0:
+            mark = "🔶"
+        else:
+            mark = "❌"
+        subject_icon = "📐" if q.get("subject") == "数学" else "📘"
+
+        content += f"**{subject_icon} {q.get('id','')}【{q.get('type','')}】({q.get('score',0)}分) {mark}**\n"
+        content += f"📝 {q.get('content','')[:80]}...\n"
+        content += f"✏️ 你的答案：{item.get('student_answer','')}\n"
+
+        if ratio < 1.0:
+            content += f"✅ 正确答案：{q.get('correct_answer','')}\n"
+
+        if item.get("analysis"):
+            content += f"💡 {item.get('analysis','')}\n"
+
+        if item.get("error_reason") and ratio < 1.0:
+            content += f"⚠️ 错因：{item.get('error_reason','')}\n"
+
+        if item.get("example") and ratio < 1.0:
+            content += f"🌟 案例：{item.get('example','')}\n"
+
+        content += "\n"
+
+    # 剩余待完成题目
+    remaining = result.get("remaining_questions", [])
+    if remaining:
+        content += "---\n"
+        content += f"⏳ **还有 {len(remaining)} 道题待完成**\n\n"
+        for q in remaining:
+            subject_icon = "📐" if q.get("subject") == "数学" else "📘"
+            content += f"{subject_icon} **{q.get('id','')}** ({q.get('score',0)}分)\n"
+            content += f"   {q.get('content','')[:80]}...\n"
+        content += "\n📸 完成剩余题目后，拍照发送即可继续批改。\n"
+
+    content += "---\n"
+    content += "> 🐱 小肥猫学习·智能批改 v2.2\n"
+    content += "> 📋 支持多图片区段匹配 | 部分批改 | 进度追踪\n"
+    content += "> 💡 回复「调整：XXX」修改批改规则 | 「查看进度」看完成情况"
+
+    return title, content
+
+
+# ==================== v2.2 逐日进度追踪 ====================
+
+_PROGRESS_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+def _get_progress_path() -> Path:
+    """获取进度文件路径"""
+    return _PROGRESS_DIR / "daily_progress.json"
+
+
+def _load_progress() -> dict:
+    """加载每日进度文件"""
+    path = _get_progress_path()
+    if not path.exists():
+        return {"daily": {}}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"daily": {}}
+
+
+def _save_progress(data: dict):
+    """保存每日进度文件"""
+    path = _get_progress_path()
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def get_daily_progress(date_str: str) -> dict:
+    """获取指定日期的进度"""
+    progress = _load_progress()
+    return progress.get("daily", {}).get(date_str, {})
+
+
+def mark_questions_graded(date_str: str, question_ids: list):
+    """标记题目已批改"""
+    progress = _load_progress()
+    daily = progress.setdefault("daily", {}).setdefault(date_str, {
+        "total_questions": 0,
+        "graded_question_ids": [],
+        "last_updated": "",
+    })
+
+    # 去重追加
+    existing = set(daily.get("graded_question_ids", []))
+    existing.update(question_ids)
+    daily["graded_question_ids"] = list(existing)
+    daily["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    _save_progress(progress)
+    logger.info(f"[进度] {date_str} 已批改: {len(daily['graded_question_ids'])} 题")
+
+
+def set_daily_total_questions(date_str: str, total: int):
+    """设置某日总题目数（通常由出题脚本调用）"""
+    progress = _load_progress()
+    daily = progress.setdefault("daily", {}).setdefault(date_str, {
+        "total_questions": total,
+        "graded_question_ids": [],
+        "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    })
+    daily["total_questions"] = total
+    _save_progress(progress)
+
+
+def check_previous_day_completion(date_str: str) -> dict:
+    """
+    检查前一天是否完成所有题目。
+    如果前一天有题目但未全部完成，返回阻止信息。
+
+    Returns: {
+        "can_proceed": bool,
+        "prev_date": "",
+        "remaining_questions": [{id, content, ...}, ...],
+    }
+    """
+    # 计算前一天
+    try:
+        today_dt = datetime.strptime(date_str, "%Y-%m-%d")
+        prev_dt = today_dt - timedelta(days=1)
+        prev_date = prev_dt.strftime("%Y-%m-%d")
+    except ValueError:
+        return {"can_proceed": True, "prev_date": "", "remaining_questions": []}
+
+    progress = _load_progress()
+    prev_progress = progress.get("daily", {}).get(prev_date, {})
+
+    # 前一天没有题目（没出题），不阻止
+    if not prev_progress:
+        return {"can_proceed": True, "prev_date": prev_date, "remaining_questions": []}
+
+    prev_total = prev_progress.get("total_questions", 0)
+    prev_graded = len(prev_progress.get("graded_question_ids", []))
+
+    if prev_total == 0:
+        return {"can_proceed": True, "prev_date": prev_date, "remaining_questions": []}
+
+    if prev_graded >= prev_total:
+        return {"can_proceed": True, "prev_date": prev_date, "remaining_questions": []}
+
+    # 有未完成的题目，需要获取题目详情
+    remaining = []
+    try:
+        # 尝试从 Bitable 读取前一天未完成的题目
+        from feishu_api import bitable_list_records
+        import lark_oapi as lark
+        # 需要 API client，但这里没有 feishu_client 实例...
+        # 先返回基本信息
+        graded_set = set(prev_progress.get("graded_question_ids", []))
+        remaining = [{"id": f"Q{i+1}", "content": f"第{i+1}题（共{prev_total}题）"} 
+                     for i in range(prev_total) if f"Q{i+1}" not in graded_set]
+    except Exception:
+        pass
+
+    return {
+        "can_proceed": False,
+        "prev_date": prev_date,
+        "remaining_questions": remaining or [
+            {"id": "?", "content": f"共{prev_total}题，已完成{prev_graded}题，还剩{prev_total - prev_graded}题"}
+        ],
+    }

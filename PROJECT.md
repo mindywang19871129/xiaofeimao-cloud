@@ -1,7 +1,7 @@
 # 小肥猫学习·项目全貌
 
-> 最后更新：2026-05-18 13:44 | 存档用途：避免每次加载大量上下文
-> **v2.1 升级（2026-05-18）**：KET/数学考试标准评分 + 英语语法时态严格判错 + 案例示范输出
+> 最后更新：2026-05-18 15:25 | 存档用途：避免每次加载大量上下文
+> **v2.2 升级（2026-05-18）**：多图片批次处理 + 区段匹配部分批改 + 逐日强制完成 + 图片发送修复
 
 ## 一、项目概述
 
@@ -123,6 +123,80 @@
 scp grading_rules.json jump-server:/opt/xiaofeimao/grading_rules.json
 ```
 或直接在 JumpServer 上通过 `deploy-all.sh` 自动同步。
+
+---
+
+## 二点六、v2.2 多图片批次处理系统（2026-05-18 新增）
+
+### 核心升级
+
+| 模块 | v2.1（旧） | v2.2（新） |
+|------|---------|---------|
+| **图片发送** | 仅支持接收图片，无发送能力 | 新增 `upload_feishu_image()` + `send_feishu_image()` + 批量发送 |
+| **多图片处理** | 单张图片→全部题目 | 60秒批次收集→逐张OCR→区段匹配→部分批改 |
+| **题目匹配** | 整图识别全部答案 | AI区段匹配：每张图→对应题目区段 |
+| **部分批改** | 不支持 | 已答题目自动批改，未答题目提示补充 |
+| **进度追踪** | 无 | `daily_progress.json` 记录每日哪些题已批改 |
+| **逐日强制** | 无 | 必须完成 Day N 才能开始 Day N+1 |
+
+### 图片批次处理流程 v2.2
+
+```
+飞书发送多张图片
+├── 第1张 → 加入批次 → 启动60秒定时器
+├── 第2张 → 加入批次 → 重置定时器
+├── ...
+├── 定时器到期 → _process_image_batch()
+│   ├── 1. 逐日前置检查（check_previous_day_completion）
+│   │   └── 未完成前一天 → ⛔ 阻止，提示剩余题目
+│   ├── 2. 逐张 DeepSeek Vision OCR
+│   ├── 3. AI 区段匹配（_match_sections_to_questions）
+│   │   └── 图1 → [M1, M2, M3] / 图2 → [E1, E2, E3, E4]
+│   ├── 4. 按区段提取答案 + 深度批改
+│   ├── 5. 标记已批改题目到 daily_progress.json
+│   └── 6. 输出：已批改结果 + 剩余待完成题目列表
+```
+
+### 逐日强制完成规则
+
+- **规则**：必须完成 Day N-1 的所有题目，才能开始 Day N
+- **检查时机**：每次提交答案（文本或图片）前
+- **阻止消息**：显示前一天日期 + 剩余未完成题目
+- **进度查询**：回复「查看进度」或「完成情况」
+- **完成标志**：当日的所有题目都已被批改（不论对错）
+
+### 新增/修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `feishu_api.py` | **新增**：`upload_feishu_image()`、`send_feishu_image()`、`send_feishu_images_batch()`、`_get_tenant_token()` |
+| `main.py` | **重写图片处理**：图片批次收集（60秒窗口）+ `_process_image_batch()` + 逐日检查 + 进度指令 |
+| `grading.py` | **新增**：`grade_submission_multi_image()`、`format_partial_grading_card()`、`check_previous_day_completion()`、`get_daily_progress()`、`mark_questions_graded()`、`set_daily_total_questions()`、`_match_sections_to_questions()`、`_extract_answers_by_section()` |
+| `daily_task.py` | **新增**：出题后自动调用 `set_daily_total_questions()` 初始化进度 |
+| `daily_progress.json` | **新增**：每日进度存储文件 |
+| `PROJECT.md` | **更新**：v2.2 文档 |
+
+### 部署命令（JumpServer）
+
+```bash
+# 1. 拉取最新代码
+cd /opt/xiaofeimao && git pull origin main
+
+# 2. 重启批改服务（如果改了 ws-server 代码）
+systemctl restart xiaofeimao
+
+# 3. 确认服务正常
+systemctl status xiaofeimao
+journalctl -u xiaofeimao -n 20 --no-pager
+```
+
+### 新增指令
+
+| 指令 | 功能 |
+|------|------|
+| `查看进度` / `完成情况` / `今日进度` | 显示当日已完成/待完成题目数 |
+| `今日题目` / `重新发题目` / `题目列表` | **从 Bitable 读取当日所有题目**（按科目分组，含题号、题型、分值、题干） |
+| 发送多张图片 | 60秒内发送的图片归入同一批次，统一OCR+区段匹配+部分批改 |
 
 ---
 
