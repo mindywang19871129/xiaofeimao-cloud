@@ -716,7 +716,7 @@ def build_generation_prompt(day_offset, date_str, math_topic, english_topic, new
         "score": <分值>,
         "content": "<题目完整内容>",
         "correct_answer": "<正确答案>",
-        "answer_format": "<家长提交答案的期望格式提示>",
+        "answer_format": "<家长提交答案的格式提示。⚠️ 示例中绝对不能出现本题的真实答案！用'X'或'word1'等占位符代替>"
         "knowledge_point": "<知识点标签>",
         "explanation": "<详细解析>",
         "scoring_criteria": ["<评分要点1>", "<评分要点2>"]
@@ -735,7 +735,9 @@ def build_generation_prompt(day_offset, date_str, math_topic, english_topic, new
 2. 数学应用题的场景要贴近三年级孩子生活
 3. 英语作文如有，必须给出 scoring_criteria（评分标准）
 4. correct_answer 字段必须是精确匹配的标准答案
-5. explanation 要详细到孩子看了就能明白错在哪里"""
+5. explanation 要详细到孩子看了就能明白错在哪里
+6. ⛔ **content 字段=纯题目**：不能包含任何答案、提示或解析！像真正的考试卷一样只用题目描述，需要配图时用ASCII字符画补充
+7. ⛔ **answer_format 示例占位符**：只能用「word1, word2」或「句子A; 句子B」等通用占位符，绝不能出现本题的真实答案！"""
 
     return prompt
 

@@ -189,11 +189,7 @@ def build_push_content(questions_data):
 
         for i, q in enumerate(eng_data.get("questions", []), 1):
             content += f"**第{i}题【{q['type']}】（{q['score']}分）**\n"
-            content += f"{q['content']}\n"
-            hint = q.get("answer_format", "")
-            if hint:
-                content += f"_作答提示: {hint}_\n"
-            content += "\n"
+            content += f"{q['content']}\n\n"
 
     content += "---\n\n"
     content += "> ✅ 做完后将答案回复给我，我来批改解析！\n"
