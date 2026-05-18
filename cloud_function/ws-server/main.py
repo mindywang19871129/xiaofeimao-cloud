@@ -24,7 +24,14 @@ from lark_oapi.api.im.v1.model.p2_im_message_receive_v1 import P2ImMessageReceiv
 
 # 导入本地模块
 from feishu_api import create_client, send_feishu_card, send_feishu_text
-from grading import grade_submission, format_grading_card, is_command
+from grading import (
+    grade_submission,
+    format_grading_card,
+    is_command,
+    detect_modification_suggestion,
+    process_modification_suggestion,
+    load_grading_rules,
+)
 
 # ==================== 配置 ====================
 
@@ -186,7 +193,56 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
 
         logger.info(f"[消息] sender={sender_id[:12]}... type={message.message_type} text={text[:80]}")
 
-        # 3️⃣ 指令拦截
+        # 3️⃣ 修改建议检测（优先于指令检测）
+        if detect_modification_suggestion(text):
+            logger.info(f"[修改建议] 检测到规则修改建议: {text[:60]}")
+            send_feishu_text(fs_client, sender_id, "🐱 正在解析修改建议...")
+            try:
+                result = process_modification_suggestion(text)
+                if result.get("success"):
+                    send_feishu_text(
+                        fs_client, sender_id,
+                        f"✅ 规则已更新！\n\n"
+                        f"📝 {result.get('message', '')}\n"
+                        f"💡 {result.get('explanation', '')}\n\n"
+                        f"下次批改将自动应用新规则。\n"
+                        f"发送「查看规则」可查看所有当前规则。"
+                    )
+                    logger.info(f"[修改建议] 处理成功: {result.get('action')}")
+                else:
+                    send_feishu_text(
+                        fs_client, sender_id,
+                        f"⚠️ 规则调整未生效\n\n{result.get('message', '')}\n\n"
+                        f"💡 提示：请用更明确的语言，例如：\n"
+                        f"「调整：翻译题意思对即可」\n"
+                        f"「修改：数学答案用中文写也算对」\n"
+                        f"「新增规则：单词拼写差1个字母不扣全分」"
+                    )
+            except Exception as e:
+                logger.error(f"[修改建议] 处理异常: {e}")
+                send_feishu_text(
+                    fs_client, sender_id,
+                    f"⚠️ 规则调整失败: {str(e)[:100]}\n请稍后重试或直接编辑 grading_rules.json"
+                )
+            return
+
+        # 4️⃣ 查看规则 + 指令拦截
+        if "查看规则" in text or "规则列表" in text or "所有规则" in text:
+            logger.info("[指令] 查看规则")
+            rules = load_grading_rules()
+            if rules:
+                rules_text = "📋 **当前批改规则**\n\n"
+                for i, r in enumerate(rules, 1):
+                    subject_map = {"all": "全科", "数学": "📐数学", "英语": "📘英语"}
+                    subject_label = subject_map.get(r.get("subject", "all"), r.get("subject", ""))
+                    rules_text += f"{i}. [{subject_label}] {r.get('rule', '')}\n"
+                rules_text += "\n💡 回复「调整：XXX」即可修改规则"
+                send_feishu_text(fs_client, sender_id, rules_text)
+            else:
+                send_feishu_text(fs_client, sender_id, "📋 暂无自定义规则（使用默认批改标准）")
+            return
+
+        # 4️⃣ 指令拦截
         if is_command(text):
             logger.info(f"[指令] 识别为指令: {text[:50]}")
             send_feishu_text(
@@ -199,7 +255,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
             )
             return
 
-        # 4️⃣ 执行批改
+        # 5️⃣ 执行批改
         logger.info("[批改] 开始处理...")
         result = grade_submission(fs_client, text, msg_date, image_key)
 
@@ -207,7 +263,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
             title, content = format_grading_card(result)
             send_feishu_card(fs_client, sender_id, title, content)
             logger.info(
-                f"[批改完成] {result['correct_count']}✓/{result['wrong_count']}✗ "
+                f"[批改完成] {result['correct_count']}✓/{result.get('partial_count',0)}🔶/{result['wrong_count']}✗ "
                 f"得分率 {result['pass_rate']}%"
             )
         else:

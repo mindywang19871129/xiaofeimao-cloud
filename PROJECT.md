@@ -1,6 +1,7 @@
 # 小肥猫学习·项目全貌
 
-> 最后更新：2026-05-18 | 存档用途：避免每次加载大量上下文
+> 最后更新：2026-05-18 13:44 | 存档用途：避免每次加载大量上下文
+> **v2.1 升级（2026-05-18）**：KET/数学考试标准评分 + 英语语法时态严格判错 + 案例示范输出
 
 ## 一、项目概述
 
@@ -8,8 +9,9 @@
 
 - **GitHub**: `mindywang19871129/xiaofeimao-cloud`
 - **飞书应用名**: 小肥猫学习
-- **AI**: DeepSeek API（出题 + 批改）
+- **AI**: DeepSeek API（出题 + 智能批改 + 规则解析）
 - **数据存储**: 飞书多维表格（Bitable）+ 本地 JSON
+- **v2 核心能力**：LLM智能答案解析 + 深度分析批改 + 飞书动态规则调整
 
 ---
 
@@ -45,6 +47,85 @@
 
 ---
 
+## 二点五、智能批改系统 v2.1（2026-05-18 升级）
+
+### 核心升级
+
+| 模块 | v1（旧） | v2（新） |
+|------|---------|---------|
+| **答案解析** | 正则匹配3种固定格式 | LLM理解任意格式（句子/中文数字/混合） |
+| **批改方式** | 精确匹配 → 失败才走AI | 每道题都由AI深度分析 |
+| **评分** | 全对/全错 二级 | 满分/半对/全错 三级（score_ratio） |
+| **错因分析** | 简单匹配判断 | AI分析思维过程+错因+改进建议 |
+| **规则调整** | 写死在代码里，需重新部署 | 飞书回复「调整：XXX」自动生效 |
+
+### 处理流程 v2
+
+```
+飞书消息
+├── 修改建议（以"调整"/"修改"/"新增规则"等开头）
+│   └── LLM解析 → 提取规则 → 存入 grading_rules.json → 确认回复
+├── 查看规则指令
+│   └── 列出所有当前活跃规则
+├── 其他指令（查看错题本等）
+│   └── 提示格式说明
+└── 答案提交（文本或图片）
+    ├── 图片 → OCR识别 → LLM提取答案
+    ├── 文本 → LLM智能解析答案（理解非标准格式）
+    └── LLM深度批改（注入当前规则）→ 分级评分 → 错题入库 → 结果卡片
+```
+
+### 动态规则系统
+
+**规则存储**：`项目根目录/grading_rules.json`
+
+**飞书调整方式**：
+```
+# 在飞书单聊中直接回复（会自动识别为修改建议，不触发批改）
+调整：翻译题只要意思对就可以，不用逐字匹配
+修改：数学答案写成中文也算对，比如"六十三页"
+新增规则：单词拼写差1个字母算半对，不扣全分
+删除规则：rule_20260518_1
+查看规则
+```
+
+**系统自动**：
+1. LLM 解析自然语言修改建议
+2. 提取：科目、规则类型、规则文本
+3. 存入 grading_rules.json
+4. 下次批改自动加载生效（无需重启服务）
+
+**内置默认规则**（grading_rules.json v2.1，共10条）：
+1. 核心意思一致即可给分，不要求逐字匹配
+2. 非标准格式先理解含义再判断，但语义错该扣就扣
+3. 分级评分：全分/半分/零分
+4. 英语拼写差1个字母标半对，考拼写则全错
+5. **【KET语法硬标准】时态错误/词形变种/主谓不一致 → 直接判错(0.0)，必须指出错误点+正确形式+案例**
+6. **【KET评分标准】时态/语态/主谓一致为核心得分点，扣分必须附带解释和案例**
+7. **【小学数学计算标准】结果正确全分，方法正确计算错半分，展示正确步骤**
+8. **【小学数学应用题标准】列式+计算+答案+单位全对才满分，缺项扣分，给出完整解题示范**
+9. 翻译题看语义，但时态和语态必须正确
+10. 每道错题必须输出：错因+正确答案+案例示范+记忆技巧
+
+### 关键代码变更
+
+| 文件 | 变更 |
+|------|------|
+| `grading.py` | 重写：新增 `parse_answers_with_ai()`、`deep_grade_with_ai()`（v2.1含KET/数学考试标准）、`process_modification_suggestion()`、`detect_modification_suggestion()`、`load_grading_rules()`、`_ket_scoring_standard()`、`_math_scoring_standard()` |
+| `main.py` | 新增修改建议检测（步骤3）+ 查看规则指令（步骤4）+ 指令拦截（步骤5）+ 批改（步骤6） |
+| `grading_rules.json` | 新增：动态规则存储文件，v2.1升级为10条（含KET和数学考试标准） |
+| `format_grading_card()` | 增强：显示分级评分（🔶半对）、思维分析、改进建议、**案例示范(🌟)** |
+
+### 部署注意
+
+部署 v2 时需要将 `grading_rules.json` 同步到 JumpServer：
+```bash
+scp grading_rules.json jump-server:/opt/xiaofeimao/grading_rules.json
+```
+或直接在 JumpServer 上通过 `deploy-all.sh` 自动同步。
+
+---
+
 ## 三、完整文件清单
 
 ### 核心服务（JumpServer 运行）
@@ -68,9 +149,10 @@
 | `daily_questions.json` | 当日题目缓存 |
 | `weekend_bundle.json` | 周五三合一题目缓存 |
 | `mistake_book.json` | 本地错题本（JSON） |
+| `grading_rules.json` | **v2新增**：动态批改规则存储（飞书调整自动写入） |
 | `system_prompt.md` | AI 出题系统提示词 |
-| `system_prompt_for_feishu_ai.md` | 飞书 AI 提示词 |
-| `cloud_prompt_compact.md` | 精简版云函数提示词 |
+| `system_prompt_for_feishu_ai.md` | 飞书 AI 提示词（备用方案） |
+| `cloud_prompt_compact.md` | 精简版提示词 v2（含智能批改说明） |
 
 ### 已废弃/不再使用
 
@@ -116,6 +198,7 @@
 ├── daily_questions.json
 ├── weekend_bundle.json
 ├── mistake_book.json
+├── grading_rules.json          ← v2新增：动态规则
 ├── system_prompt.md
 ├── system_prompt_for_feishu_ai.md
 ├── cloud_prompt_compact.md
@@ -283,6 +366,17 @@ vim cloud_function/ws-server/.env
 systemctl restart xiaofeimao
 ```
 
+**如果首次部署 grading_rules.json（v2 新增）**：
+```bash
+# Mac 本地先提交到 Git
+cd /Users/mindy/WorkBuddy/2026-05-18-task-10/xiaofeimao-cloud
+git add grading_rules.json && git commit -m "v2: 新增动态批改规则系统" && git push origin main
+
+# JumpServer 拉取
+cd /opt/xiaofeimao && git pull origin main
+systemctl restart xiaofeimao
+```
+
 ## 九、端到端测试流程
 
 每次部署后必须验证的测试路径：
@@ -312,6 +406,28 @@ systemctl restart xiaofeimao
 1. 在 JumpServer 执行: python3 daily_task.py --force
 2. 预期: 飞书收到今日练习卡片，Bitable 每日题目表新增题目
 3. 验证: curl 或 Bitable UI 查看记录数
+```
+
+### 测试 5：v2 智能答案解析（非标准格式）
+```
+1. 飞书单聊发送: 第一题83，第二题44，第三题一共63页剩下22页，第四题forget arrive plan
+2. 预期: AI正确匹配各题答案，正常批改（不报格式错误）
+3. 验证: 答案匹配正确，各题答案与题目ID对应
+```
+
+### 测试 6：v2 修改建议
+```
+1. 飞书单聊发送: 调整：翻译题意对即可，不用逐字匹配
+2. 预期: 收到"正在解析修改建议..." → "规则已更新"确认
+3. 飞书发送: 查看规则
+4. 预期: 新规则出现在规则列表中
+```
+
+### 测试 7：v2 分级评分
+```
+1. 提交一道答案与标准答案相似但不完全一致的题目
+2. 预期: 批改卡片中显示🔶半对，且解析说明何处正确、何处错误
+3. 验证: 得分率计算正确（半对=半分）
 ```
 
 ## 十、环境变量速查（JumpServer .env）
