@@ -246,12 +246,12 @@ def grade_submission(
         f = rec.fields or {}
         questions.append({
             "id": f.get("题号", ""),
-            "num": int(f.get("题号", "0").lstrip("MEme") or 0),
+            "num": int((f.get("题号", "0") or "0").lstrip("MEme") or 0),
             "type": f.get("题型", ""),
             "content": f.get("题目内容", ""),
             "correct_answer": f.get("正确答案", ""),
             "knowledge_point": f.get("知识点", ""),
-            "score": f.get("分值", 0),
+            "score": int(f.get("分值", 0) or 0),
             "subject": f.get("科目", ""),
         })
 

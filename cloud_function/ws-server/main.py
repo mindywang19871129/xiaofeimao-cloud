@@ -14,7 +14,10 @@ import os
 import sys
 import json
 import logging
+import base64
+import requests
 from datetime import datetime
+from openai import OpenAI
 
 import lark_oapi as lark
 from lark_oapi.api.im.v1.model.p2_im_message_receive_v1 import P2ImMessageReceiveV1
@@ -28,6 +31,8 @@ from grading import grade_submission, format_grading_card, is_command
 APP_ID = os.environ.get("FEISHU_APP_ID", "")
 APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
 USER_OPEN_ID = os.environ.get("USER_OPEN_ID", "ou_8bf3770ed43ce0f273c7a34f1597cfe9")
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 
 # 日志
 logging.basicConfig(
@@ -82,46 +87,107 @@ def _extract_message_text(message) -> str:
     return ""
 
 
+def _download_image(image_key: str) -> bytes:
+    """从飞书下载图片"""
+    token_resp = fs_client.auth.v3.tenant_access_token.internal.create(
+        lark.auth.v3.CreateTenantAccessTokenReq(
+            body={"app_id": APP_ID, "app_secret": APP_SECRET}
+        )
+    )
+    token = token_resp.data.tenant_access_token
+    url = f"https://open.feishu.cn/open-apis/im/v1/images/{image_key}"
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(url, headers=headers, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise Exception(f"下载图片失败: {data.get('msg')}")
+    return resp.content
+
+
+def _ocr_image(image_bytes: bytes) -> str:
+    """用 DeepSeek Vision 从图片提取答案文本"""
+    if not DEEPSEEK_API_KEY:
+        return ""
+    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+    b64 = base64.b64encode(image_bytes).decode()
+    resp = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "这是一张作业答案图片。请提取所有答案，按题号顺序输出，每道题答案用空格分隔。如有多选或填空多空，用逗号分隔。只输出答案，不要解释。"},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+            ]
+        }],
+        max_tokens=500,
+    )
+    return resp.choices[0].message.content.strip()
+
+
 def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
     """
     处理飞书消息事件（WebSocket 推送）
-    对应事件类型：im.message.receive_v1
+    支持 text / post / image 三种消息类型
     """
     try:
         event = data.event
         message = event.message
 
-        # 提取消息文字内容（支持 text 和 post 两种类型）
-        text = _extract_message_text(message)
-        if not text:
-            logger.info(f"忽略非文本消息: {message.message_type}")
-            return
-
-        if not text:
-            return
-
         # 提取发送者 open_id
         sender_id = event.sender.sender_id.open_id or USER_OPEN_ID
-
-        # 获取消息时间
         msg_timestamp = int(message.create_time) if message.create_time else 0
         msg_date = datetime.fromtimestamp(msg_timestamp / 1000).strftime("%Y-%m-%d")
 
+        # 1️⃣ 处理图片消息：下载 → OCR → 提取答案
+        if message.message_type == "image":
+            msg_content = json.loads(message.content)
+            image_key = msg_content.get("image_key", "")
+            logger.info(f"[图片] sender={sender_id[:12]}... image_key={image_key[:20]}...")
+
+            if not image_key:
+                return
+
+            send_feishu_text(fs_client, sender_id, "🔍 正在识别图片中的答案...")
+            try:
+                image_bytes = _download_image(image_key)
+                text = _ocr_image(image_bytes)
+                logger.info(f"[OCR] 识别结果: {text[:100]}")
+            except Exception as e:
+                logger.error(f"[OCR失败] {e}")
+                send_feishu_text(fs_client, sender_id, f"⚠️ 图片识别失败: {str(e)[:80]}")
+                return
+
+            if not text:
+                send_feishu_text(fs_client, sender_id, "⚠️ 未能从图片中识别到答案文本，请拍照更清晰后重试。")
+                return
+
+        # 2️⃣ 处理文本消息
+        else:
+            text = _extract_message_text(message)
+            if not text:
+                logger.info(f"忽略非文本/非图片消息: {message.message_type}")
+                return
+
+        if not text:
+            return
+
         logger.info(f"[消息] sender={sender_id[:12]}... type={message.message_type} text={text[:80]}")
 
-        # 指令处理：友好回复而非静默跳过
+        # 3️⃣ 指令拦截
         if is_command(text):
             logger.info(f"[指令] 识别为指令: {text[:50]}")
             send_feishu_text(
                 fs_client, sender_id,
-                f"🐱 收到指令「{text[:30]}」\n\n"
-                f"当前长连接批改服务仅支持**答案提交批改**功能。\n"
-                f"如需出题、错题本等功能，请使用 Mac 本地的 bot_server。\n\n"
-                f"💡 发送答案（如 83 44 63,22 forget arrive plan）即可批改。"
+                f"🐱 收到「{text[:20]}」\n\n发送答案即可自动批改，支持以下格式：\n"
+                f"• `83 44 63,22 forget arrive` （空格分隔）\n"
+                f"• `|1|83| |2|44| |3|63,22|` （管道格式）\n"
+                f"• `M1=83 M2=44 E1=important,taller` （标签格式）\n"
+                f"• 📷 直接拍照发图"
             )
             return
 
-        # 执行批改
+        # 4️⃣ 执行批改
         logger.info("[批改] 开始处理...")
         result = grade_submission(fs_client, text, msg_date)
 
@@ -133,7 +199,7 @@ def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
                 f"得分率 {result['pass_rate']}%"
             )
         else:
-            send_feishu_text(fs_client, sender_id, result.get("summary", "批改未成功，请稍后重试"))
+            send_feishu_text(fs_client, sender_id, result.get("summary", "批改未成功，请检查答案格式"))
             logger.info(f"[批改失败] {result.get('summary','')[:80]}")
 
     except Exception as e:
