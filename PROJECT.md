@@ -243,11 +243,92 @@ systemctl status xiaofeimao
 crontab -l | grep xiaofeimao
 ```
 
-### Mac 本地（开发用）
+### Mac 本地（开发用 — CodeBuddy IDE）
 ```bash
-cd /Users/mindy/WorkBuddy/2026-05-13-task-1
-git pull   # 同步最新代码
-# 改代码后
+cd /Users/mindy/WorkBuddy/2026-05-18-task-10/xiaofeimao-cloud
+# 改代码（CodeBuddy AI 辅助）
 git add -A && git commit -m "描述改动" && git push origin main
-# 然后到 JumpServer 执行 update.sh
+# 然后到 JumpServer Web 终端执行部署命令（见下方）
+```
+
+### JumpServer 部署（通过 Web 终端）
+> ⚠️ mindy 通过 **Web 页面**访问 JumpServer 终端（非 SSH 客户端）。
+> 每次 git push 后，AI 会给出需要粘贴到 Web 终端的命令。
+
+**部署命令模板**（AI 每次根据改动给出精确命令）：
+```bash
+# 1. 拉取最新代码
+cd /opt/xiaofeimao && git pull origin main
+
+# 2. 重启批改服务（如果改了 ws-server 代码）
+systemctl restart xiaofeimao
+
+# 3. 确认服务正常
+systemctl status xiaofeimao
+journalctl -u xiaofeimao -n 20 --no-pager
+```
+
+**如果改了定时任务脚本**（daily_task.py / question_generator.py 等）：
+```bash
+# 验证定时任务配置
+crontab -l | grep xiaofeimao
+```
+
+**如果改了 Bitable 表结构**（feishu_bitable.py 的 table definition）：
+```bash
+# 重新初始化 Bitable（⚠️ 会删除旧数据！）
+cd /opt/xiaofeimao && python3 feishu_bitable.py --init --force
+# 更新 .env 中的新表 ID
+vim cloud_function/ws-server/.env
+systemctl restart xiaofeimao
+```
+
+## 九、端到端测试流程
+
+每次部署后必须验证的测试路径：
+
+### 测试 1：文本批改
+```
+1. 飞书单聊发送: M1=300 M2=④ M3=20;500 M4=16;16 E1=should,must,permission,rule
+2. 预期: 几秒内收到批改卡片，显示得分率和每道题对错
+3. 验证: Bitable 错题本有新记录
+```
+
+### 测试 2：图片批改
+```
+1. 飞书单聊发送一张手写答案的图片
+2. 预期: 收到"🔍 正在识别图片中的答案..." → 识别结果 → 批改卡片
+3. 验证: 错题本记录中「来源图片」字段非空
+```
+
+### 测试 3：指令拦截
+```
+1. 飞书单聊发送: 查看错题本
+2. 预期: 收到指令提示，不触发批改
+```
+
+### 测试 4：每日出题
+```
+1. 在 JumpServer 执行: python3 daily_task.py --force
+2. 预期: 飞书收到今日练习卡片，Bitable 每日题目表新增题目
+3. 验证: curl 或 Bitable UI 查看记录数
+```
+
+## 十、环境变量速查（JumpServer .env）
+
+```bash
+# 路径: /opt/xiaofeimao/cloud_function/ws-server/.env
+FEISHU_APP_ID=cli_aa8f8d25a925dbea
+FEISHU_APP_SECRET=<见 bitable 文档>
+DEEPSEEK_API_KEY=<见 DeepSeek 控制台>
+BITABLE_APP_TOKEN=HA4Mba31Eaiz1DsCpn6cCHmonjb
+BITABLE_DAILY_TABLE_ID=tblZs7lETr1CvOW6
+BITABLE_MISTAKE_TABLE_ID=tblPKWO7tJVLXnmi
+USER_OPEN_ID=ou_8bf3770ed43ce0f273c7a34f1597cfe9
+```
+
+### 如何更新环境变量
+```bash
+vim /opt/xiaofeimao/cloud_function/ws-server/.env
+systemctl restart xiaofeimao
 ```
