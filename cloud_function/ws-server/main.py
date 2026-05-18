@@ -96,12 +96,10 @@ def _extract_message_text(message) -> str:
 
 def _download_image(image_key: str) -> bytes:
     """从飞书下载图片（API 返回二进制图片数据，非 JSON）"""
-    token_resp = fs_client.auth.v3.tenant_access_token.internal.create(
-        lark.auth.v3.CreateTenantAccessTokenReq(
-            body={"app_id": APP_ID, "app_secret": APP_SECRET}
-        )
-    )
-    token = token_resp.data.tenant_access_token
+    # 使用 HTTP 方式获取 token（避免 SDK 版本兼容问题）
+    token_url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
+    token_resp = requests.post(token_url, json={"app_id": APP_ID, "app_secret": APP_SECRET}, timeout=15)
+    token = token_resp.json()["tenant_access_token"]
     url = f"https://open.feishu.cn/open-apis/im/v1/images/{image_key}"
     headers = {"Authorization": f"Bearer {token}"}
     resp = requests.get(url, headers=headers, timeout=30)
