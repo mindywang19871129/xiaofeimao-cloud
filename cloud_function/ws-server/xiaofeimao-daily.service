@@ -1,0 +1,23 @@
+[Unit]
+Description=小肥猫学习 - 每日自动出题任务
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=xiaofeimao
+WorkingDirectory=/opt/xiaofeimao
+EnvironmentFile=/opt/xiaofeimao/cloud_function/ws-server/.env
+ExecStart=/opt/xiaofeimao/cloud_function/ws-server/venv/bin/python3 /opt/xiaofeimao/daily_task.py
+StandardOutput=journal
+StandardError=journal
+
+# 安全加固（oneshot 放宽 ProtectSystem 以允许写入日志和数据文件）
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/xiaofeimao
+
+# 超时保护（10 分钟足够）
+TimeoutStartSec=600

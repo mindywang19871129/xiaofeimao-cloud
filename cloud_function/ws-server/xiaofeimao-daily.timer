@@ -1,0 +1,12 @@
+[Unit]
+Description=小肥猫学习 - 每日 09:00 自动出题定时器
+Requires=xiaofeimao-daily.service
+
+[Timer]
+OnCalendar=daily
+OnCalendar=*-*-* 09:00:00
+Persistent=true
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target
