@@ -272,23 +272,44 @@ def _download_image(image_key: str) -> tuple:
 
 
 def _ocr_image(image_bytes: bytes) -> str:
-    """用 DeepSeek Vision 从图片提取答案文本"""
+    """
+    从图片提取答案文本。
+    优先使用飞书 OCR（中文识别更准），
+    飞书 OCR 不可用时降级为 DeepSeek Vision。
+    """
+    # 1️⃣ 飞书 OCR（首选：中文专精，速度更快，无需额外 API Key）
+    from feishu_api import ocr_image_feishu
+    text_lines = ocr_image_feishu(image_bytes)
+    if text_lines:
+        ocr_result = "\n".join(text_lines)
+        logger.info(f"[OCR-飞书] 识别结果 ({len(text_lines)}行): {ocr_result[:100]}")
+        return ocr_result
+
+    # 2️⃣ DeepSeek Vision（降级：需要 Vision API Key）
     if not DEEPSEEK_API_KEY:
+        logger.warning("[OCR] 飞书 OCR 不可用，DeepSeek 也未配置")
         return ""
-    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
-    b64 = base64.b64encode(image_bytes).decode()
-    resp = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[{
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "这是一张作业答案图片。请提取所有答案，按题号顺序输出，每道题答案用空格分隔。如有多选或填空多空，用逗号分隔。只输出答案，不要解释。"},
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
-            ]
-        }],
-        max_tokens=500,
-    )
-    return resp.choices[0].message.content.strip()
+
+    try:
+        client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+        b64 = base64.b64encode(image_bytes).decode()
+        resp = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "这是一张作业答案图片。请提取所有答案，按题号顺序输出，每道题答案用空格分隔。如有多选或填空多空，用逗号分隔。只输出答案，不要解释。"},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                ]
+            }],
+            max_tokens=500,
+        )
+        result = resp.choices[0].message.content.strip()
+        logger.info(f"[OCR-DeepSeek] 识别结果: {result[:100]}")
+        return result
+    except Exception as e:
+        logger.warning(f"[OCR-DeepSeek] 失败: {e}")
+        return ""
 
 
 def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:

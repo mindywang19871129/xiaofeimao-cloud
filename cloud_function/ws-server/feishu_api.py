@@ -95,6 +95,57 @@ def _detect_image_info(image_bytes: bytes) -> tuple:
     return ("jpg", "image/jpeg")
 
 
+def ocr_image_feishu(image_bytes: bytes) -> list[str]:
+    """
+    使用飞书 OCR API 识别图片中的文字。
+    API: POST /open-apis/optical_char_recognition/v1/image/basic_recognize
+    Body: {"image": "base64_string"}
+    限制: 图片 < 5MB, 20 QPS/租户
+
+    Returns: 识别到的文本行列表（按区域划分），失败时返回空列表
+    """
+    import base64 as b64
+    from urllib.parse import quote
+
+    # 检查图片大小（飞书限制 5MB = 5 * 1024 * 1024 bytes）
+    if len(image_bytes) > 5 * 1024 * 1024:
+        logger.warning(f"图片过大 ({len(image_bytes)} bytes)，超过飞书OCR 5MB限制")
+        return []
+
+    token = _get_tenant_token()
+    url = "https://open.feishu.cn/open-apis/optical_char_recognition/v1/image/basic_recognize"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    body = {"image": b64.b64encode(image_bytes).decode("ascii")}
+
+    try:
+        resp = requests.post(url, headers=headers, json=body, timeout=30)
+        data = resp.json()
+        code = data.get("code", -1)
+
+        if code == 0:
+            text_list = data.get("data", {}).get("text_list", [])
+            logger.info(f"飞书OCR成功: 识别到 {len(text_list)} 行文本")
+            return text_list
+
+        # 权限不足
+        if code == 99991663 or "no permission" in data.get("msg", "").lower():
+            logger.warning(f"飞书OCR权限未开启，需要 optical_char_recognition:image 权限")
+            return []
+
+        logger.warning(f"飞书OCR失败: code={code}, msg={data.get('msg', '')}")
+        return []
+
+    except requests.exceptions.Timeout:
+        logger.warning("飞书OCR请求超时")
+        return []
+    except Exception as e:
+        logger.warning(f"飞书OCR异常: {e}")
+        return []
+
+
 def upload_feishu_image(image_bytes: bytes, image_type: str = "message") -> Optional[str]:
     """
     上传图片到飞书，获取 image_key。

@@ -147,8 +147,31 @@ else:
     wn("跳过（上传失败）")
 
 
-# ===== 测试 5：OCR（DeepSeek Vision）=====
-hr("🔍 测试 5：OCR 图片识别（DeepSeek Vision）")
+# ===== 测试 5：飞书 OCR（中文专精）=====
+hr("🔤 测试 5：飞书 OCR（中文专精）")
+
+try:
+    from feishu_api import ocr_image_feishu
+    text_lines = ocr_image_feishu(test_img)
+
+    if text_lines and len(text_lines) > 0:
+        ok(f"飞书OCR成功: 识别到 {len(text_lines)} 行文本 → {text_lines}")
+    elif text_lines is not None and len(text_lines) == 0:
+        wn("飞书OCR返回空列表（权限未开通？需在飞书开放平台开启 optical_char_recognition:image）")
+    else:
+        wn("飞书OCR返回空")
+except ImportError as e:
+    ng(f"ocr_image_feishu 导入失败: {e}")
+except Exception as e:
+    err_msg = str(e)[:120]
+    if "99991672" in err_msg or "no permission" in err_msg.lower() or "Access denied" in err_msg:
+        wn(f"飞书OCR权限未开启 → {err_msg[:80]}")
+    else:
+        ng(f"飞书OCR异常: {err_msg}")
+
+
+# ===== 测试 6：OCR 降级（DeepSeek Vision）=====
+hr("🔍 测试 6：OCR 降级 DeepSeek Vision")
 
 try:
     from main import _ocr_image
@@ -167,8 +190,8 @@ except Exception as e:
         ng(f"OCR 异常: {type(e).__name__}: {err_msg}")
 
 
-# ===== 测试 6：多图片批改引擎 =====
-hr("📋 测试 6：多图片批改引擎（模拟）")
+# ===== 测试 7：多图片批改引擎 =====
+hr("📋 测试 7：多图片批改引擎（模拟）")
 
 try:
     from grading import grade_submission_multi_image, format_partial_grading_card
