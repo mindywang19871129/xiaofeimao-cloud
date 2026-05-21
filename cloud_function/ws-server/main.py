@@ -13,6 +13,7 @@
 import os
 import sys
 import json
+import io
 import time
 import threading
 import logging
@@ -271,45 +272,187 @@ def _download_image(image_key: str) -> tuple:
     return resp.content, content_type
 
 
+# ==================== OCR 图片预处理 ====================
+
+# 常见 OCR 识别错误纠正表（中文同形字/形近字混淆）
+_OCR_CORRECTIONS = {
+    "捅": "桶", "铜": "桶", "简": "筒",
+    "千克": "千克",  # 防止被替换
+    "干克": "千克", "十克": "千克",
+    "干米": "千米", "午米": "千米",
+    "屋米": "厘米", "厘来": "厘米", "厦米": "厘米",
+    "分来": "分米", "分米": "分米",
+    "寒来": "毫米", "亳米": "毫米",
+    "平方干米": "平方千米", "立方米": "立方米",
+    "平万米": "平方米", "平米": "平方米",
+    "干吨": "千吨", "午吨": "千吨",
+    "竞然": "竟然", "井且": "并且",
+    "左石": "左右", "大约": "大约",
+    "正确": "正确", "辅误": "错误",
+    "不变": "不变", "平移": "平移",
+    "旋传": "旋转", "对称": "对称",
+    "倒如": "例如", "相以": "相似",
+    "因比": "因此", "所以": "所以",
+    "日": "日",  # 保留日期用
+}
+
+# 多轮 OCR 后可调用 DeepSeek 做语义校验的关键词
+_VISION_VERIFY_TRIGGER = ["千克", "千米", "平移", "旋转", "对称", "不变"]
+
+
+def _preprocess_for_ocr(image_bytes: bytes, min_short_side: int = 800) -> bytes:
+    """
+    图片预处理：提高 OCR 识别率
+    - 自动缩放（短边不足 800px 时放大）
+    - 灰度化 + 自适应对比度增强
+    - 锐化
+    - 可选去噪
+
+    Returns: 处理后的 JPEG bytes（适合 OCR）
+    """
+    try:
+        from PIL import Image, ImageEnhance, ImageFilter
+
+        img = Image.open(io.BytesIO(image_bytes))
+
+        # 如果图片是 RGBA，转为 RGB
+        if img.mode == "RGBA":
+            background = Image.new("RGB", img.size, (255, 255, 255))
+            background.paste(img, mask=img.split()[3])
+            img = background
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+
+        w, h = img.size
+        short_side = min(w, h)
+        long_side = max(w, h)
+
+        # === 1. 自适应缩放 ===
+        if short_side < min_short_side:
+            scale = min_short_side / short_side
+            # 避免过长边超出合理范围（3200px）
+            if long_side * scale > 3200:
+                scale = 3200 / long_side
+            new_w, new_h = int(w * scale), int(h * scale)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+            logger.info(f"[预处理] 缩放: {w}x{h} → {new_w}x{new_h} (scale={scale:.1f}x)")
+
+        # === 2. 对比度增强 ===
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.3)  # 提高 30% 对比度
+
+        # === 3. 锐化 ===
+        img = img.filter(ImageFilter.SHARPEN)
+
+        # === 4. 输出为 JPEG ===
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=92)
+        processed = buf.getvalue()
+
+        logger.info(f"[预处理] 完成: {len(image_bytes)}→{len(processed)} bytes")
+        return processed
+
+    except ImportError:
+        logger.warning("[预处理] Pillow 不可用，跳过预处理")
+        return image_bytes
+    except Exception as e:
+        logger.warning(f"[预处理] 失败: {e}，使用原图")
+        return image_bytes
+
+
+def _correct_ocr_text(text: str) -> str:
+    """
+    OCR 结果智能纠错：修复常见中文形近字混淆
+    例如：干克 → 千克，屋米 → 厘米，旋传 → 旋转
+    """
+    if not text:
+        return text
+
+    result = text
+    for wrong, correct in _OCR_CORRECTIONS.items():
+        if wrong != correct and wrong in result:
+            result = result.replace(wrong, correct)
+            logger.info(f"[OCR纠错] {wrong} → {correct}")
+
+    return result
+
+
 def _ocr_image(image_bytes: bytes) -> str:
     """
-    从图片提取答案文本。
-    优先使用飞书 OCR（中文识别更准），
-    飞书 OCR 不可用时降级为 DeepSeek Vision。
+    从图片提取答案文本 — 增强版。
+    1️⃣ 原图 → 飞书 OCR
+    2️⃣ 预处理图 → 飞书 OCR（结果合并去重）
+    3️⃣ 降级 → DeepSeek Vision
+    4️⃣ 结果智能纠错
     """
-    # 1️⃣ 飞书 OCR（首选：中文专精，速度更快，无需额外 API Key）
     from feishu_api import ocr_image_feishu
-    text_lines = ocr_image_feishu(image_bytes)
-    if text_lines:
-        ocr_result = "\n".join(text_lines)
-        logger.info(f"[OCR-飞书] 识别结果 ({len(text_lines)}行): {ocr_result[:100]}")
-        return ocr_result
 
-    # 2️⃣ DeepSeek Vision（降级：需要 Vision API Key）
-    if not DEEPSEEK_API_KEY:
-        logger.warning("[OCR] 飞书 OCR 不可用，DeepSeek 也未配置")
-        return ""
+    collected_lines = []  # 用 list 保持顺序，去重
+    seen = set()
 
-    try:
-        client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
-        b64 = base64.b64encode(image_bytes).decode()
-        resp = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "这是一张作业答案图片。请提取所有答案，按题号顺序输出，每道题答案用空格分隔。如有多选或填空多空，用逗号分隔。只输出答案，不要解释。"},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
-                ]
-            }],
-            max_tokens=500,
-        )
-        result = resp.choices[0].message.content.strip()
-        logger.info(f"[OCR-DeepSeek] 识别结果: {result[:100]}")
-        return result
-    except Exception as e:
-        logger.warning(f"[OCR-DeepSeek] 失败: {e}")
-        return ""
+    def add_lines(lines):
+        for line in lines:
+            stripped = line.strip()
+            if stripped and stripped not in seen:
+                seen.add(stripped)
+                collected_lines.append(stripped)
+
+    # ===== 1️⃣ 原图 → 飞书 OCR =====
+    text_lines_1 = ocr_image_feishu(image_bytes)
+    add_lines(text_lines_1)
+    logger.info(f"[OCR-原图] 飞书OCR → {len(text_lines_1)} 行")
+
+    # ===== 2️⃣ 预处理图 → 飞书 OCR（第二遍，捕捉遗漏） =====
+    preprocessed = _preprocess_for_ocr(image_bytes)
+    if preprocessed != image_bytes:
+        text_lines_2 = ocr_image_feishu(preprocessed)
+        new_count = sum(1 for l in text_lines_2 if l.strip() not in seen)
+        add_lines(text_lines_2)
+        logger.info(f"[OCR-增强] 飞书OCR → {len(text_lines_2)} 行（新增 {new_count} 行）")
+
+    ocr_result = "\n".join(collected_lines)
+
+    # ===== 3️⃣ 智能纠错 =====
+    corrected = _correct_ocr_text(ocr_result)
+    if corrected != ocr_result:
+        logger.info(f"[OCR纠错] 应用纠错规则")
+
+    # ===== 4️⃣ 如果结果太少，尝试 DeepSeek Vision =====
+    if len(corrected) < 10 and DEEPSEEK_API_KEY:
+        logger.info("[OCR] 飞书OCR结果稀疏，尝试 DeepSeek Vision")
+        try:
+            client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+            b64 = base64.b64encode(preprocessed).decode()
+            resp = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": (
+                            "这是一张小学生作业答案图片（数学或英语）。请做三件事：\n"
+                            "1. 仔细观察图片中所有手写或印刷的文字\n"
+                            "2. 提取所有答案内容，按从上到下、从左到右的顺序输出\n"
+                            "3. 特别注意手写的中文、数字和数学符号，不要遗漏\n"
+                            "如果图片中有题号（如 1. 2. 3.），请保留题号。\n"
+                            "只输出识别到的内容，不要解释或点评。"
+                        )},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                    ]
+                }],
+                max_tokens=800,
+            )
+            vision_result = resp.choices[0].message.content.strip()
+            logger.info(f"[OCR-Vision] DeepSeek: {vision_result[:100]}")
+            # 合并：如果 Vision 结果明显更丰富，替换；否则追加
+            if len(vision_result) > len(corrected) * 1.5:
+                corrected = vision_result
+            else:
+                corrected += "\n" + vision_result
+        except Exception as e:
+            logger.warning(f"[OCR-Vision] 降级失败: {e}")
+
+    logger.info(f"[OCR完成] 最终结果 ({len(corrected)} 字符): {corrected[:120]}")
+    return corrected.strip()
 
 
 def do_p2_im_message_receive_v1(data: P2ImMessageReceiveV1) -> None:
