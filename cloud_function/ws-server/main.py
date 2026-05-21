@@ -242,11 +242,18 @@ def _download_image(image_key: str) -> tuple:
     """
     from feishu_api import _get_tenant_token
 
+    from urllib.parse import quote
+
     token = _get_tenant_token()
-    url = f"https://open.feishu.cn/open-apis/im/v1/images/{image_key}"
+    # 飞书图片下载 API：image_key 需 URL 编码（可能含特殊字符），image_type=message 表示消息图片
+    url = f"https://open.feishu.cn/open-apis/im/v1/images/{quote(image_key, safe='')}?image_type=message"
     headers = {"Authorization": f"Bearer {token}"}
+    logger.info(f"[下载图片] URL={url[:100]}...")
     resp = requests.get(url, headers=headers, timeout=30)
-    resp.raise_for_status()
+
+    if resp.status_code != 200:
+        logger.error(f"[下载失败] HTTP {resp.status_code}: {resp.text[:200]}")
+        resp.raise_for_status()
 
     # 飞书图片下载 API 直接返回二进制图片数据（Content-Type: image/*）
     content_type = resp.headers.get("Content-Type", "image/jpeg")

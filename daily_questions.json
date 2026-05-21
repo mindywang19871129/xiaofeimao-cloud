@@ -1,87 +1,71 @@
 {
-  "date": "2026-05-18",
+  "date": "2026-05-19",
   "status": "pending_grading",
-  "total_score": 35,
+  "total_score": 36,
   "math": {
     "subject": "数学",
     "count": 4,
     "total_score": 18,
-    "topic": "长方形和正方形面积计算",
+    "topic": "周长逆运算与综合应用",
     "questions": [
       {
         "id": "M1",
         "num": 1,
         "type": "填空题",
         "score": 4,
-        "content": "一个长方形的长是15厘米，宽是8厘米，它的面积是多少平方厘米？",
-        "correct_answer": "120",
-        "knowledge_point": "长方形面积计算",
-        "explanation": "长方形面积=长×宽=15×8=120（平方厘米）。注意单位是平方厘米，不要忘记写单位，但答案只写数字即可。"
+        "content": "一个正方形的周长是36厘米，它的边长是多少厘米？",
+        "correct_answer": "9厘米",
+        "knowledge_point": "已知周长求正方形边长",
+        "explanation": "正方形有四条相等的边，所以边长 = 周长 ÷ 4 = 36 ÷ 4 = 9（厘米）。"
       },
       {
         "id": "M2",
         "num": 2,
         "type": "选择题",
         "score": 4,
-        "content": "一个正方形的面积是64平方厘米，它的边长是多少厘米？\nA. 6厘米  B. 7厘米  C. 8厘米  D. 9厘米",
-        "correct_answer": "C",
-        "knowledge_point": "已知正方形面积反求边长",
-        "explanation": "正方形面积=边长×边长。想哪两个相同的数相乘等于64？8×8=64，所以边长是8厘米。选C。"
+        "content": "一个长方形的周长是20分米，长是6分米，宽是多少分米？\nA. 4分米  B. 7分米  C. 14分米  D. 2分米",
+        "correct_answer": "A",
+        "knowledge_point": "已知长方形周长和一条边求另一条",
+        "explanation": "长方形的周长 = (长 + 宽) × 2，所以长 + 宽 = 周长 ÷ 2 = 20 ÷ 2 = 10（分米）。宽 = 10 - 长 = 10 - 6 = 4（分米）。"
       },
       {
         "id": "M3",
         "num": 3,
-        "type": "综合应用题",
-        "score": 6,
-        "content": "小明的房间地面是一个长方形，长6米，宽4米。他想在地面铺上边长为2分米的正方形地砖。请问：\n（1）房间地面的面积是多少平方米？\n（2）每块地砖的面积是多少平方分米？\n（3）铺满整个房间需要多少块地砖？（提示：注意单位统一）",
-        "correct_answer": "24平方米; 4平方分米; 600块",
-        "knowledge_point": "长方形面积计算、正方形面积计算、面积单位换算、除法应用",
-        "explanation": "（1）房间面积=长×宽=6×4=24（平方米）。\n（2）地砖面积=边长×边长=2×2=4（平方分米）。\n（3）先把房间面积24平方米换算成2400平方分米（因为1平方米=100平方分米，24×100=2400）。然后2400÷4=600（块）。\n注意：单位不同不能直接除，要先统一单位。"
+        "type": "填空题",
+        "score": 4,
+        "content": "用两个长6厘米、宽3厘米的长方形拼成一个正方形，拼成的正方形周长是多少厘米？",
+        "correct_answer": "24厘米",
+        "knowledge_point": "拼组图形的周长变化",
+        "explanation": "两个长方形拼成正方形时，长边重合（6厘米），宽边叠加（3+3=6厘米），所以正方形边长是6厘米，周长 = 6 × 4 = 24（厘米）。注意：原来两个长方形周长和是 (6+3)×2×2=36厘米，拼起来后减少了两个6厘米的边，所以新周长是24厘米。"
       },
       {
         "id": "M4",
         "num": 4,
-        "type": "图形分析与计算题",
-        "score": 4,
-        "content": "下面是一个由两个长方形拼成的L形图形（单位：厘米）。请你计算它的总面积。\n\n    5cm\n  +------+---+\n  |      |   | 3cm\n  |      +---+\n  |          | 2cm\n  +----------+\n      8cm\n\n提示：可以把这个图形分成上下两个长方形，或者用填补法补成一个大的长方形再减去小长方形。",
-        "correct_answer": "31",
-        "knowledge_point": "组合图形面积计算（分割法）",
-        "explanation": "用分割法：把图形分成上下两个长方形。\n上面的长方形：长5厘米，宽3厘米，面积=5×3=15（平方厘米）。\n下面的长方形：长8厘米，宽2厘米，面积=8×2=16（平方厘米）。\n总面积=15+16=31（平方厘米）。\n也可以用填补法：补成一个长8厘米、宽5厘米的大长方形，面积=8×5=40（平方厘米），再减去右上角的小长方形（长3厘米、宽3厘米，面积=3×3=9），40-9=31（平方厘米）。"
+        "type": "应用题",
+        "score": 6,
+        "content": "小明家有一块长方形菜地，长8米，宽5米。他准备在菜地四周围上篱笆，但菜地的一边靠墙（长边靠墙），篱笆只围三边。请问需要篱笆多少米？如果每米篱笆5元，买篱笆需要多少元？",
+        "correct_answer": "18米；90元",
+        "knowledge_point": "周长与实际生活的结合",
+        "explanation": "菜地长8米的一边靠墙，所以篱笆只围剩下的三边：两条宽和一条长。篱笆长度 = 宽 + 宽 + 长 = 5 + 5 + 8 = 18（米）。总价 = 18 × 5 = 90（元）。"
       }
     ]
   },
   "english": {
     "subject": "英语KET",
     "count": 4,
-    "total_score": 17,
+    "total_score": 18,
     "grammar_topic": "现在完成时 have/has done",
     "new_words": [
-      "important",
-      "tall",
-      "taller",
-      "tallest",
-      "short",
-      "shorter",
-      "shortest",
-      "big",
-      "bigger",
-      "biggest",
-      "small",
-      "smaller",
-      "smallest",
-      "long",
-      "longer",
-      "longest",
-      "fast",
-      "faster",
-      "fastest",
-      "good",
-      "better",
-      "best",
-      "bad",
-      "worse",
-      "worst",
-      "more"
+      "most",
+      "less",
+      "least",
+      "than",
+      "as...as",
+      "in",
+      "on",
+      "at",
+      "under",
+      "behind"
     ],
     "questions": [
       {
@@ -89,63 +73,63 @@
         "num": 1,
         "type": "单词默写/翻译",
         "score": 4,
-        "content": "根据中文写出对应的英文单词（每个1分）：\n1. 重要的 ______\n2. 更高的 ______\n3. 最好的 ______\n4. 更快的 ______",
-        "correct_answer": "important; taller; best; faster",
-        "answer_format": "请按题号顺序填写，多个单词用分号隔开，如：word1; word2; word3; word4",
-        "knowledge_point": "新单词默写（形容词原级/比较级/最高级）",
-        "explanation": "1. important 是形容词，意思是'重要的'。2. taller 是 tall 的比较级，意思是'更高的'。3. best 是 good 的最高级，意思是'最好的'。4. faster 是 fast 的比较级，意思是'更快的'。注意比较级和最高级的拼写规则。",
+        "content": "请写出下列单词的中文意思：\n1. most ________\n2. less ________\n3. least ________\n4. behind ________",
+        "correct_answer": "1. 最多 2. 更少 3. 最少 4. 在...后面",
+        "answer_format": "依次写出中文意思，用逗号分隔，如：最多, 更少, 最少, 在...后面",
+        "knowledge_point": "新词记忆",
+        "explanation": "most 表示最多；less 是 little 的比较级，表示更少；least 是 little 的最高级，表示最少；behind 是介词，表示在...后面。",
         "scoring_criteria": [
-          "每个单词1分",
-          "拼写完全正确才得分",
-          "大小写不扣分"
+          "每个单词1分，意思正确即得分",
+          "拼写错误但意思正确扣0.5分"
         ]
       },
       {
         "id": "E2",
         "num": 2,
         "type": "语法填空/选择",
-        "score": 5,
-        "content": "用所给动词的现在完成时（have/has done）填空（每空1分）：\n1. I ______ (finish) my homework already.\n2. She ______ (not eat) breakfast yet.\n3. ______ you ever ______ (be) to Beijing?\n4. He ______ just ______ (arrive).\n5. We ______ (see) that movie before.",
-        "correct_answer": "have finished; hasn't eaten; Have...been; has...arrived; have seen",
-        "answer_format": "请按题号顺序填写，多个单词用分号隔开，如：word1; word2; word3; word4; word5",
-        "knowledge_point": "现在完成时 have/has done 结构，含否定和疑问式",
-        "explanation": "现在完成时的结构是：主语 + have/has + 过去分词。\n1. I 用 have，finish 的过去分词是 finished。\n2. She 用 has，否定加 not，eat 的过去分词是 eaten。\n3. 疑问句将 have 提前，you 用 have，be 的过去分词是 been。\n4. He 用 has，arrive 的过去分词是 arrived。\n5. We 用 have，see 的过去分词是 seen。\n注意：already 用于肯定句，yet 用于否定和疑问句，just 用于肯定句。",
+        "score": 4,
+        "content": "用括号内动词的现在完成时形式填空：\n1. She ________ (finish) her homework already.\n2. I ________ (not see) that movie yet.\n3. ________ he ever ________ (be) to Beijing?\n4. They ________ just ________ (eat) lunch.",
+        "correct_answer": "1. has finished 2. have not seen / haven't seen 3. Has...been 4. have...eaten",
+        "answer_format": "依次填写，用逗号分隔，如：has finished, have not seen, Has been, have eaten",
+        "knowledge_point": "现在完成时 have/has done",
+        "explanation": "现在完成时结构：have/has + 过去分词。主语是第三人称单数（she/he/it）用has，其他人称用have。already用于肯定句，yet用于否定句和疑问句。",
         "scoring_criteria": [
-          "每空1分，共5空",
-          "动词形式正确（过去分词）得0.5分，助动词正确得0.5分",
-          "拼写错误扣0.5分"
+          "每个空1分，时态正确得满分",
+          "have/has用错扣0.5分",
+          "过去分词形式错误扣0.5分"
         ]
       },
       {
         "id": "E3",
         "num": 3,
         "type": "句子翻译/造句",
-        "score": 4,
-        "content": "请将下列句子翻译成英文（每个2分）：\n1. 这本书比那本书更重要。\n2. 他已经吃过早饭了。",
-        "correct_answer": "This book is more important than that book.; He has already eaten breakfast.",
-        "answer_format": "请按题号顺序填写，两个句子用分号隔开，如：句子1; 句子2",
-        "knowledge_point": "现在完成时 + 比较级用法",
-        "explanation": "1. '更重要'用比较级 more important，注意比较结构是 A is more important than B。\n2. '已经'用 already，现在完成时结构：He has already eaten。'吃早饭'是 eat breakfast，过去分词是 eaten。",
+        "score": 5,
+        "content": "用所给单词和现在完成时造句：\n1. (as...as) 这个苹果和那个苹果一样大。\n2. (in/behind) 猫在盒子里面，狗在盒子后面。",
+        "correct_answer": "1. This apple is as big as that apple. 2. The cat is in the box, and the dog is behind the box.",
+        "answer_format": "写出两个完整的英文句子，如：句子1；句子2",
+        "knowledge_point": "新词+语法综合运用",
+        "explanation": "as...as 中间用形容词原级，表示和...一样。in 表示在...里面，behind 表示在...后面。注意现在完成时未要求，但句子需正确使用介词。",
         "scoring_criteria": [
-          "每个句子2分",
-          "语法正确得1分，词汇正确得1分",
-          "有拼写错误扣0.5分"
+          "每句2.5分",
+          "as...as结构正确得1分",
+          "介词使用正确得1分",
+          "句子完整无语法错误得0.5分"
         ]
       },
       {
         "id": "E4",
         "num": 4,
         "type": "短文阅读理解简答",
-        "score": 4,
-        "content": "阅读下面短文，回答问题（每题2分）：\n\nTom is a tall boy. He has just finished his mathematics book. He thinks it is important to study hard. His friend Lily is shorter than Tom, but she runs faster. Lily has never been to Beijing, but she wants to go. They both enjoy playing games.\n\n1. Who is taller, Tom or Lily?\n2. Has Lily ever been to Beijing?",
-        "correct_answer": "Tom is taller.; No, she hasn't.",
-        "answer_format": "请按题号顺序填写，答案用完整句子，两句用分号隔开，如：句子1; 句子2",
-        "knowledge_point": "阅读理解 + 比较级 + 现在完成时",
-        "explanation": "1. 文中说 'Tom is a tall boy' 和 'Lily is shorter than Tom'，所以 Tom 更高。\n2. 文中说 'Lily has never been to Beijing'，never 表示从未去过，所以答案是否定的。注意要用现在完成时的否定回答：No, she hasn't. 或 No, she has never been to Beijing. 都可以。",
+        "score": 5,
+        "content": "阅读下面短文，回答问题：\nTom has just finished his homework. He has put his book on the desk. His cat is under the chair. His dog is behind the door. Tom has never been to the park, but he has been to the zoo most times. He likes animals more than sports.\n\n问题：\n1. Where is the cat? (用完整句子回答)\n2. Has Tom ever been to the park?\n3. Does Tom like sports more than animals?",
+        "correct_answer": "1. The cat is under the chair. 2. No, he has never been to the park. 3. No, he likes animals more than sports.",
+        "answer_format": "写出三个完整句子，如：1. 句子；2. 句子；3. 句子",
+        "knowledge_point": "阅读理解+现在完成时+新词",
+        "explanation": "短文使用了现在完成时（has just finished, has put, has never been）和新词（under, behind, on, most, than）。问题1考介词under；问题2考never用法；问题3考比较级more than。",
         "scoring_criteria": [
-          "每个问题2分",
-          "答案正确得1分，语法正确得1分",
-          "拼写错误扣0.5分"
+          "每个问题1.5分，共4.5分，完整回答得0.5分",
+          "答案正确得1分",
+          "语法错误扣0.5分"
         ]
       }
     ]
@@ -153,12 +137,12 @@
   "_grading_notes": {
     "parent_answer_format_hint": "家长通常用 |题号|答案| 格式提交答案。数学题答案通常是数字或算式；英语单词默写答案是英文单词（多个用/分隔）；语法填空答案用/分隔；作文是完整英文段落。",
     "common_variations": [
-      "|M1|120|格式",
-      "M1=120格式",
+      "|M1|9厘米|格式",
+      "M1=9厘米格式",
       "纯数字顺序格式",
       "科目前缀格式"
     ]
   },
-  "generated_at": "2026-05-18T14:23:38.148721",
-  "day_offset": 5
+  "generated_at": "2026-05-19T10:50:29.533993",
+  "day_offset": 6
 }
